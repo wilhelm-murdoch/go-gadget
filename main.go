@@ -2,13 +2,17 @@ package main
 
 // template mode in + out
 // default output is json
+// pipe from stdin?
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
-	"html/template"
 	"io/fs"
 	"log"
 	"os"
@@ -18,8 +22,9 @@ import (
 )
 
 var (
-	ignoredPatterns = []string{"_benchmark.go", "_test.go"}
-	manifest        map[string]*Package
+	// ignoredPatterns = []string{"_benchmark.go", "_test.go"}
+	ignoredPatterns = []string{"_benchmark.go"}
+	manifest        = make(map[string]*Package)
 )
 
 func endsWithIgnoredPattern(s string) bool {
@@ -32,12 +37,11 @@ func endsWithIgnoredPattern(s string) bool {
 }
 
 func main() {
-	var path, in, out, format string
+	var path, in, out string
 
 	flag.StringVar(&path, "path", "*.go", "The directory to search for *.go files.")
 	flag.StringVar(&in, "in", "README.tpl", "The path to the template you would like to evaluate.")
 	flag.StringVar(&out, "out", "README.md", "The path to store the processed output.")
-	flag.StringVar(&format, "format", "json", "The desired output format; JSON support only.")
 	flag.Parse()
 
 	var files []string
@@ -56,7 +60,8 @@ func main() {
 	})
 
 	for _, file := range files {
-		parsed, err := parser.ParseFile(token.NewFileSet(), file, nil, parser.ParseComments)
+		tfs := token.NewFileSet()
+		parsed, err := parser.ParseFile(tfs, file, nil, parser.ParseComments)
 		if err != nil {
 			log.Println(err)
 			break
@@ -74,52 +79,46 @@ func main() {
 			Path: file,
 		}
 
-		ast.Inspect(parsed, func(n ast.Node) bool {
-			switch fn := n.(type) {
+		ast.Inspect(parsed, func(node ast.Node) bool {
+			switch fn := node.(type) {
 			case *ast.FuncDecl:
-				fnc := &Function{
-					Name:    fn.Name.Name,
-					Comment: fn.Doc.Text(),
+				var fntype bytes.Buffer
+				if err := format.Node(&fntype, tfs, fn.Type); err != nil {
+					panic(err)
 				}
 
-				f.Functions.Push(fnc)
+				var fnbody bytes.Buffer
+				if err := format.Node(&fnbody, tfs, fn.Body); err != nil {
+					panic(err)
+				}
+
+				f.Functions = append(f.Functions, &Function{
+					Type:    fmt.Sprintf("%s", fntype.Bytes()),
+					Name:    fn.Name.Name,
+					Comment: fn.Doc.Text(),
+					Body:    fmt.Sprintf("%s", fnbody.Bytes()),
+				})
 			}
 
 			return true
 		})
 
-		pkg.Files.Push(f)
+		manifest[pkg].Files = append(manifest[pkg].Files, f)
 	}
 
-	t, err := template.ParseFiles(in)
+	encoder := json.NewEncoder(os.Stdout)
 
+	err = encoder.Encode(manifest)
 	if err != nil {
 		panic(err)
 	}
 
-	packages := []*Package{}
+	// template, err := template.ParseFiles(in)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	manifest.Each(func(i int, p *Package) bool {
-		packages = append(packages, p)
-		return false
-	})
-
-	err = t.Execute(os.Stdout, packages)
-
-	if err != nil {
-		panic(err)
-	}
-
-	// manifest.Each(func(i int, p *Package) bool {
-	// 	fmt.Println("Package: ", p.Name)
-	// 	p.Files.Each(func(i int, f *File) bool {
-	// 		fmt.Println("\tFile: ", f.Name)
-	// 		f.Functions.Each(func(i int, f *Function) bool {
-	// 			fmt.Println("\t\tFunc", f.Name)
-	// 			return false
-	// 		})
-	// 		return false
-	// 	})
-	// 	return false
-	// })
+	// if err = template.Execute(os.Stdout, manifest); err != nil {
+	// 	panic(err)
+	// }
 }

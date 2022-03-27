@@ -1,6 +1,6 @@
 package main
 
 type Package struct {
-	Name  string
-	Files []*File
+	Name  string  `json:"name"`
+	Files []*File `json:"files"`
 }

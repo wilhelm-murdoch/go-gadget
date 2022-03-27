@@ -1,7 +1,7 @@
 package main
 
 type File struct {
-	Path      string
-	Name      string
-	Functions []*Function
+	Path      string      `json:"path"`
+	Name      string      `json:"name"`
+	Functions []*Function `json:"functions"`
 }
