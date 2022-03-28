@@ -1,8 +1,12 @@
 package main
 
 // template mode in + out
-// default output is json
 // pipe from stdin?
+// logging
+// add support for:
+// - imports
+// - structs
+// - variables / constants
 
 import (
 	"bytes"
@@ -13,46 +17,40 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"html"
+	"html/template"
 	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-)
 
-var (
-	// ignoredPatterns = []string{"_benchmark.go", "_test.go"}
-	ignoredPatterns = []string{"_benchmark.go"}
-	manifest        = make(map[string]*Package)
+	"github.com/davecgh/go-spew/spew"
+	"github.com/wilhelm-murdoch/go-collection"
 )
-
-func endsWithIgnoredPattern(s string) bool {
-	for _, pattern := range ignoredPatterns {
-		if strings.HasSuffix(s, pattern) {
-			return true
-		}
-	}
-	return false
-}
 
 func main() {
-	var path, in, out string
+	var flgPath, flgIn, flgOut, flgFormat string
 
-	flag.StringVar(&path, "path", "*.go", "The directory to search for *.go files.")
-	flag.StringVar(&in, "in", "README.tpl", "The path to the template you would like to evaluate.")
-	flag.StringVar(&out, "out", "README.md", "The path to store the processed output.")
+	flag.StringVar(&flgPath, "path", "*.go", "The directory to search for *.go files.")
+	flag.StringVar(&flgIn, "in", "README.tpl", "The path to the template you would like to evaluate.")
+	flag.StringVar(&flgOut, "out", "README.md", "The path to store the processed output.")
+	flag.StringVar(&flgFormat, "format", "json", "Chosen output format; json, template or debug")
 	flag.Parse()
 
 	var files []string
+
+	functions := collection.New[*Function]()
+	packages := collection.New[string]()
 
 	pattern, err := regexp.Compile(".+\\.go$")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	filepath.WalkDir(path, func(path string, dir fs.DirEntry, err error) error {
-		if err == nil && pattern.MatchString(dir.Name()) && !endsWithIgnoredPattern(dir.Name()) {
+	filepath.WalkDir(flgPath, func(path string, dir fs.DirEntry, err error) error {
+		if err == nil && pattern.MatchString(dir.Name()) {
 			files = append(files, path)
 		}
 
@@ -67,17 +65,7 @@ func main() {
 			break
 		}
 
-		pkg := parsed.Name.String()
-
-		_, ok := manifest[pkg]
-		if !ok {
-			manifest[pkg] = &Package{Name: pkg}
-		}
-
-		f := &File{
-			Name: filepath.Base(file),
-			Path: file,
-		}
+		packages.PushDistinct(parsed.Name.String())
 
 		ast.Inspect(parsed, func(node ast.Node) bool {
 			switch fn := node.(type) {
@@ -92,33 +80,70 @@ func main() {
 					panic(err)
 				}
 
-				f.Functions = append(f.Functions, &Function{
-					Type:    fmt.Sprintf("%s", fntype.Bytes()),
-					Name:    fn.Name.Name,
-					Comment: fn.Doc.Text(),
-					Body:    fmt.Sprintf("%s", fnbody.Bytes()),
+				functions.Push(&Function{
+					Package:  parsed.Name.String(),
+					FileName: filepath.Base(file),
+					FilePath: file,
+					Type:     fmt.Sprintf("%s", fntype.Bytes()),
+					Name:     fn.Name.Name,
+					Comment:  strings.ReplaceAll(fn.Doc.Text(), "\n", ""),
+					Body:     fmt.Sprintf("%s", fnbody.Bytes()),
+					Exported: fn.Name.IsExported(),
 				})
 			}
 
 			return true
 		})
-
-		manifest[pkg].Files = append(manifest[pkg].Files, f)
 	}
 
-	encoder := json.NewEncoder(os.Stdout)
+	// This is a bit janky at the moment. What I want is to associate an function
+	// with its "example" counterpart, if it exists. This is so I can print out
+	// example text along with the rest of the function's documentation. This may
+	// grow a bit out-of-hand as support for other data types grows.
+	functions.Each(func(i int, f1 *Function) bool {
+		if strings.HasPrefix(f1.Name, "Example") {
+			cmp := strings.Split(strings.Replace(f1.Name, "Example", "", 1), "_")
 
-	err = encoder.Encode(manifest)
-	if err != nil {
-		panic(err)
+			found := functions.Find(func(i int, f2 *Function) bool {
+				return f2.Package == strings.ToLower(cmp[0]) && f2.Name == cmp[1]
+			})
+
+			if found != nil {
+				found.SetExample(f1.Body)
+			}
+		}
+		return false
+	})
+
+	// This is the final data structure containing all of our collated
+	// declarations. We munge it all together before finally passing it on to
+	// whichever chosen output format.
+	output := make(map[string]any, 0)
+
+	output["functions"] = functions.Items()
+	output["packages"] = packages.Items()
+
+	switch flgFormat {
+	case "debug":
+		spew.Dump(output)
+	case "template":
+		tpl, err := template.ParseFiles(flgIn)
+		if err != nil {
+			panic(err)
+		}
+
+		var buffer strings.Builder
+		if err = tpl.Execute(&buffer, output); err != nil {
+			panic(err)
+		}
+
+		fmt.Print(html.UnescapeString(buffer.String()))
+	default:
+	case "json":
+		encoder := json.NewEncoder(os.Stdout)
+
+		if err := encoder.Encode(output); err != nil {
+			panic(err)
+		}
 	}
-
-	// template, err := template.ParseFiles(in)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// if err = template.Execute(os.Stdout, manifest); err != nil {
-	// 	panic(err)
-	// }
 }

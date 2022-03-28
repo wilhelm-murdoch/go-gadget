@@ -1,11 +1,15 @@
 # Packages
-{{ range . }}
-* {{ .Name }} {{ end }}
+{{ range .packages }}
+  * `{{ . }}`{{ end }}
 
 # Methods
-{{ range . }} {{ range .Files }} {{ range .Functions }}
-* [{{ .Name }}](#{{ .Name }}) {{ end }} {{ end }} {{ end }}
+{{ range .functions }}{{ if .Exported }}* [{{ .Name }}](#{{.Name}}){{ end }}
+{{ end }}
 
-{{ range . }} {{ range .Files }} {{ range .Functions }}
-## {{ .Name }}
-{{ .Comment }} {{ end }} {{ end }} {{ end }}
+{{ range .functions }}{{ if and .Exported .Example }}## {{ .Name }}
+{{ .Comment }}
+{{ .Body }}
+```go
+{{ .Example }}
+```
+{{ end }}{{ end }}
