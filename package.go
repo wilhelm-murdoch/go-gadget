@@ -1,4 +1,4 @@
-package main
+package gadget
 
 import "github.com/wilhelm-murdoch/go-collection"
 

@@ -1,3 +1,3 @@
-package main
+package gadget
 
 type Struct struct{}

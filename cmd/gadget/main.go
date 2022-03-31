@@ -12,6 +12,7 @@ import (
 	"regexp"
 
 	"github.com/wilhelm-murdoch/go-collection"
+	"github.com/wilhelm-murdoch/go-gadget"
 )
 
 func walkGoFiles(path *string) []string {
@@ -38,16 +39,16 @@ func main() {
 	)
 	flag.Parse()
 
-	packages := collection.New[*Package]()
+	packages := collection.New[*gadget.Package]()
 
 	for _, path := range walkGoFiles(flagSource) {
-		f, err := NewFile(path)
+		f, err := gadget.NewFile(path)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		p := packages.Find(func(i int, p *Package) bool {
+		p := packages.Find(func(i int, p *gadget.Package) bool {
 			return p.Name == f.Package
 		})
 		if p != nil {
@@ -55,7 +56,7 @@ func main() {
 			continue
 		}
 
-		p = NewPackage(f.Package)
+		p = gadget.NewPackage(f.Package)
 		p.Files.Push(f)
 		packages.Push(p)
 	}
