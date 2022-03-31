@@ -15,6 +15,18 @@ import (
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
+var (
+	this string // a comment for this
+
+	// a comment for that
+	that string
+)
+
+const (
+	Boo  = "ghost"
+	Hiss = "cat"
+)
+
 func walkGoFiles(path *string) []string {
 	var files []string
 
@@ -61,21 +73,18 @@ func main() {
 		packages.Push(p)
 	}
 
-	// packages.Each(func(i int, p *Package) bool {
-	// 	fmt.Println(p.Name)
-	// 	p.Files.Each(func(i int, f *File) bool {
-	// 		fmt.Println("-", f.Name)
-	// 		filtered := f.Functions.Filter(func(f *Function) bool {
-	// 			return strings.HasPrefix(f.Name, "Example")
-	// 		})
-	// 		filtered.Each(func(i int, f *Function) bool {
-	// 			fmt.Println("--", f.Body)
-	// 			return false
-	// 		})
-	// 		return false
-	// 	})
-	// 	return false
-	// })
+	packages.Each(func(i int, p *gadget.Package) bool {
+		fmt.Println("package:", p.Name)
+		p.Files.Each(func(i int, f *gadget.File) bool {
+			fmt.Println("- file:", f.Name)
+			f.General.Each(func(i int, g *gadget.General) bool {
+				fmt.Println("-- general:", g)
+				return false
+			})
+			return false
+		})
+		return false
+	})
 
 	// encoder := json.NewEncoder(os.Stdout)
 
