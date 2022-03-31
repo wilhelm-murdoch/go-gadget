@@ -17,3 +17,9 @@ func NewPackage(name string) *Package {
 		Files: collection.New[*File](),
 	}
 }
+
+// String implements the Stringer inteface and returns the current package's
+// name.
+func (p *Package) String() string {
+	return p.Name
+}

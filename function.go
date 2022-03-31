@@ -29,17 +29,19 @@ type Function struct {
 	astFile     *ast.File
 	astFunc     *ast.FuncDecl
 	tokenSet    *token.FileSet
+	parent      *File
 }
 
 // NewFunction returns a function instance and attempts to populate all
 // associated fields with meaningful values.
-func NewFunction(fn *ast.FuncDecl, ts *token.FileSet, f *ast.File) *Function {
+func NewFunction(fn *ast.FuncDecl, ts *token.FileSet, f *ast.File, parent *File) *Function {
 	return (&Function{
 		Name:     fn.Name.Name,
 		Comment:  fn.Doc.Text(),
 		astFunc:  fn,
 		tokenSet: ts,
 		astFile:  f,
+		parent:   parent,
 	}).Parse()
 }
 
@@ -126,9 +128,12 @@ func (f *Function) parseBody() {
 // parseSignature attempts to determine the current function's type and assigns
 // it to the Signature field of struct Function.
 func (f *Function) parseSignature() {
-	var b bytes.Buffer
-	if err := format.Node(&b, f.tokenSet, f.astFunc.Type); err != nil {
-		log.Println(err)
-	}
-	f.Signature += fmt.Sprintf("%s", b.Bytes())
+	line := strings.TrimSpace(string(GetLinesFromFile(f.parent.Path, f.LineStart, f.LineStart)))
+	f.Signature = line[:len(line)-1]
+}
+
+// String implements the Stringer inteface and returns the current function's
+// signature.
+func (f *Function) String() string {
+	return f.Signature
 }

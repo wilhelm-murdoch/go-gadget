@@ -1,7 +1,6 @@
 package gadget
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -22,7 +21,7 @@ type File struct {
 	HasBenchmarks bool                              `json:"has_benchmarks"`
 	HasExamples   bool                              `json:"has_examples"`
 	Imports       []string                          `json:"imports"`
-	General       *collection.Collection[*General]  `json:"general"`
+	Values        *collection.Collection[*Value]    `json:"values"`
 	Functions     *collection.Collection[*Function] `json:"functions"`
 	Types         *collection.Collection[*Type]     `json:"types"`
 	astFile       *ast.File
@@ -42,7 +41,7 @@ func NewFile(path string) (*File, error) {
 		Path:      path,
 		astFile:   astFile,
 		tokenSet:  tokenSet,
-		General:   collection.New[*General](),
+		Values:    collection.New[*Value](),
 		Functions: collection.New[*Function](),
 		Types:     collection.New[*Type](),
 	}).Parse(), nil
@@ -58,7 +57,7 @@ func (f *File) Parse() *File {
 	f.parseImports()
 	f.parseFunctions()
 	f.parseTypes()
-	f.parseGeneral()
+	f.parseValues()
 
 	return f
 }
@@ -91,7 +90,7 @@ func (f *File) parseFunctions() {
 				f.HasTests = true
 			}
 
-			f.Functions.Push(NewFunction(fn, f.tokenSet, f.astFile))
+			f.Functions.Push(NewFunction(fn, f.tokenSet, f.astFile, f))
 		}
 		return true
 	})
@@ -109,13 +108,13 @@ func (f *File) parseTypes() {
 	})
 }
 
-// parseGeneral
-func (f *File) parseGeneral() {
+// parseValues
+func (f *File) parseValues() {
 	f.walk(func(node ast.Node) bool {
 		switch gn := node.(type) {
 		case *ast.ValueSpec:
-			for _, id := range gn.Names {
-				fmt.Println(id.Obj.Kind, id.String(), id.Obj.Decl, f.tokenSet.File(f.astFile.Pos()).Line(id.Pos()))
+			for _, ident := range gn.Names {
+				f.Values.Push(NewValue(ident, f.tokenSet, f))
 			}
 		}
 		return true

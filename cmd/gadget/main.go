@@ -1,59 +1,21 @@
 package main
 
-// https://github.com/ArjenL/taggo/blob/b6906610871a22b53941432ce166423844c34b8b/main.go#L237
-
 import (
 	"flag"
 	"fmt"
-	"io/fs"
-	"log"
 	"os"
-	"path/filepath"
-	"regexp"
 
 	"github.com/wilhelm-murdoch/go-collection"
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
-var (
-	this string // a comment for this
-
-	// a comment for that
-	that string
-)
-
-const (
-	Boo  = "ghost"
-	Hiss = "cat"
-)
-
-func walkGoFiles(path *string) []string {
-	var files []string
-
-	pattern, err := regexp.Compile(".+\\.go$")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	filepath.WalkDir(*path, func(path string, dir fs.DirEntry, err error) error {
-		if err == nil && pattern.MatchString(dir.Name()) {
-			files = append(files, path)
-		}
-		return nil
-	})
-
-	return files
-}
-
 func main() {
-	var (
-		flagSource = flag.String("source", "*.go", "The directory to search for *.go files.")
-	)
+	flagSource := flag.String("source", "*.go", "The directory to search for *.go files.")
 	flag.Parse()
 
 	packages := collection.New[*gadget.Package]()
 
-	for _, path := range walkGoFiles(flagSource) {
+	for _, path := range gadget.WalkGoFiles(flagSource) {
 		f, err := gadget.NewFile(path)
 		if err != nil {
 			fmt.Println(err)
@@ -73,18 +35,26 @@ func main() {
 		packages.Push(p)
 	}
 
-	packages.Each(func(i int, p *gadget.Package) bool {
-		fmt.Println("package:", p.Name)
-		p.Files.Each(func(i int, f *gadget.File) bool {
-			fmt.Println("- file:", f.Name)
-			f.General.Each(func(i int, g *gadget.General) bool {
-				fmt.Println("-- general:", g)
-				return false
-			})
-			return false
-		})
-		return false
-	})
+	// packages.Each(func(i int, p *gadget.Package) bool {
+	// 	fmt.Println("package:", p.Name)
+	// 	p.Files.Each(func(i int, f *gadget.File) bool {
+	// 		fmt.Println("- file:", f.Name)
+	// 		f.Functions.Each(func(i int, f *gadget.Function) bool {
+	// 			fmt.Println("-- function:", f)
+	// 			return false
+	// 		})
+	// 		f.Values.Each(func(i int, g *gadget.Value) bool {
+	// 			fmt.Println("-- value:", g)
+	// 			return false
+	// 		})
+	// 		f.Types.Each(func(i int, t *gadget.Type) bool {
+	// 			fmt.Println("-- type:", t)
+	// 			return false
+	// 		})
+	// 		return false
+	// 	})
+	// 	return false
+	// })
 
 	// encoder := json.NewEncoder(os.Stdout)
 
