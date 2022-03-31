@@ -9,9 +9,25 @@ import (
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
+var (
+	Version = "v0.0.1"
+	Release = "development"
+	Sha     = "xxxxxxxx"
+)
+
 func main() {
-	flagSource := flag.String("source", "*.go", "The directory to search for *.go files.")
+	var (
+		flagSource = flag.String("source", "*.go", "The directory to search for *.go files.")
+		// flgTemplate = flag.String("template", "README.tpl", "The path to the template you would like to evaluate.")
+		// flgFormat   = flag.String("format", "json", "Chosen output format; json, template or debug.")
+		flgVersion = flag.Bool("version", false, "Current version of gadget.")
+	)
 	flag.Parse()
+
+	if *flgVersion {
+		fmt.Printf("Version: %s, Release: %s, Sha: %s\n", Version, Release, Sha)
+		os.Exit(0)
+	}
 
 	packages := collection.New[*gadget.Package]()
 
@@ -35,30 +51,40 @@ func main() {
 		packages.Push(p)
 	}
 
-	// packages.Each(func(i int, p *gadget.Package) bool {
-	// 	fmt.Println("package:", p.Name)
-	// 	p.Files.Each(func(i int, f *gadget.File) bool {
-	// 		fmt.Println("- file:", f.Name)
-	// 		f.Functions.Each(func(i int, f *gadget.Function) bool {
-	// 			fmt.Println("-- function:", f)
-	// 			return false
-	// 		})
-	// 		f.Values.Each(func(i int, g *gadget.Value) bool {
-	// 			fmt.Println("-- value:", g)
-	// 			return false
-	// 		})
-	// 		f.Types.Each(func(i int, t *gadget.Type) bool {
-	// 			fmt.Println("-- type:", t)
-	// 			return false
-	// 		})
-	// 		return false
-	// 	})
-	// 	return false
-	// })
+	packages.Each(func(i int, p *gadget.Package) bool {
+		fmt.Println("package:", p.Name)
+		p.Files.Each(func(i int, f *gadget.File) bool {
+			f.Interfaces.Each(func(i int, t *gadget.Interface) bool {
+				fmt.Println("-- type:", t)
+				return false
+			})
+			return false
+		})
+		return false
+	})
 
-	// encoder := json.NewEncoder(os.Stdout)
+	// switch *flgFormat {
+	// case "debug":
+	// 	spew.Dump(packages)
+	// 	os.Exit(0)
+	// case "template":
+	// 	tpl := template.Must(
+	// 		template.New(*flgTemplate).Funcs(sprig.FuncMap()).ParseFiles(*flgTemplate),
+	// 	)
 
-	// if err := encoder.Encode(packages.Items()); err != nil {
-	// 	log.Fatal(err)
+	// 	var buffer strings.Builder
+	// 	if err := tpl.Execute(&buffer, packages); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	fmt.Print(html.UnescapeString(buffer.String()))
+	// default:
+	// 	fallthrough
+	// case "json":
+	// 	encoder := json.NewEncoder(os.Stdout)
+
+	// 	if err := encoder.Encode(packages); err != nil {
+	// 		log.Fatal(err)
+	// 	}
 	// }
 }

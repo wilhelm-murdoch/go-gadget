@@ -35,3 +35,4 @@ cover.out
 cover.html
 .vscode
 *.bak
+cmd/gadget/gadget

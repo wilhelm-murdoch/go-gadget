@@ -71,8 +71,8 @@ func (f *Function) Parse() *Function {
 
 // parseOutput attempts to fetch the expected output block for an example
 // function and pins it to the current Function for future reference. It assumes
-// all comments following the position of string "// Output:" belong to the
-// output block.
+// all comments immediately following the position of string "// Output:"
+// belong to the output block.
 func (f *Function) parseOutput() {
 	var outputPos token.Pos
 	if f.astFile.Comments != nil {
