@@ -1,0 +1,19 @@
+package main
+
+import "github.com/wilhelm-murdoch/go-collection"
+
+// Package represents a golang package as well as all associated files,
+// functions and other declarations.
+type Package struct {
+	Name  string                        `json:"name"`
+	Files *collection.Collection[*File] `json:"files"`
+}
+
+// NewPackage returns a Package instance with an initialised collection used for
+// assigning and iterating through files.
+func NewPackage(name string) *Package {
+	return &Package{
+		Name:  name,
+		Files: collection.New[*File](),
+	}
+}
