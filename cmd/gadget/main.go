@@ -1,10 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"html"
+	"html/template"
+	"log"
 	"os"
+	"strings"
 
+	"github.com/Masterminds/sprig"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/wilhelm-murdoch/go-collection"
 	"github.com/wilhelm-murdoch/go-gadget"
 )
@@ -17,10 +24,10 @@ var (
 
 func main() {
 	var (
-		flagSource = flag.String("source", "*.go", "The directory to search for *.go files.")
-		// flgTemplate = flag.String("template", "README.tpl", "The path to the template you would like to evaluate.")
-		// flgFormat   = flag.String("format", "json", "Chosen output format; json, template or debug.")
-		flgVersion = flag.Bool("version", false, "Current version of gadget.")
+		flagSource  = flag.String("source", "*.go", "The directory to search for *.go files.")
+		flgTemplate = flag.String("template", "README.tpl", "The path to the template you would like to evaluate.")
+		flgFormat   = flag.String("format", "json", "Chosen output format; json, template or debug.")
+		flgVersion  = flag.Bool("version", false, "Current version of gadget.")
 	)
 	flag.Parse()
 
@@ -51,43 +58,43 @@ func main() {
 		packages.Push(p)
 	}
 
-	packages.Each(func(i int, p *gadget.Package) bool {
-		p.Files.Each(func(i int, f *gadget.File) bool {
-			f.Structs.Each(func(i int, s *gadget.Struct) bool {
-				fmt.Println("-- struct:", s, s.LineCount, s.Doc, s.Comment)
-				s.Fields.Each(func(i int, f *gadget.Field) bool {
-					fmt.Println("---- field:", f.Name, f.Comment)
-					return false
-				})
-				return false
-			})
-			return false
-		})
-		return false
-	})
+	// packages.Each(func(i int, p *gadget.Package) bool {
+	// 	p.Files.Each(func(i int, f *gadget.File) bool {
+	// 		f.Structs.Each(func(i int, s *gadget.Struct) bool {
+	// 			fmt.Println("-- struct:", s, s.LineCount, s.Doc, s.Comment)
+	// 			s.Fields.Each(func(i int, f *gadget.Field) bool {
+	// 				fmt.Println("---- field:", f.Name, f.Comment)
+	// 				return false
+	// 			})
+	// 			return false
+	// 		})
+	// 		return false
+	// 	})
+	// 	return false
+	// })
 
-	// switch *flgFormat {
-	// case "debug":
-	// 	spew.Dump(packages)
-	// 	os.Exit(0)
-	// case "template":
-	// 	tpl := template.Must(
-	// 		template.New(*flgTemplate).Funcs(sprig.FuncMap()).ParseFiles(*flgTemplate),
-	// 	)
+	switch *flgFormat {
+	case "debug":
+		spew.Dump(packages)
+		os.Exit(0)
+	case "template":
+		tpl := template.Must(
+			template.New(*flgTemplate).Funcs(sprig.FuncMap()).ParseFiles(*flgTemplate),
+		)
 
-	// 	var buffer strings.Builder
-	// 	if err := tpl.Execute(&buffer, packages); err != nil {
-	// 		log.Fatal(err)
-	// 	}
+		var buffer strings.Builder
+		if err := tpl.Execute(os.Stdout, &buffer); err != nil {
+			log.Fatal(err)
+		}
 
-	// 	fmt.Print(html.UnescapeString(buffer.String()))
-	// default:
-	// 	fallthrough
-	// case "json":
-	// 	encoder := json.NewEncoder(os.Stdout)
+		fmt.Print(html.UnescapeString(buffer.String()))
+	default:
+		fallthrough
+	case "json":
+		encoder := json.NewEncoder(os.Stdout)
 
-	// 	if err := encoder.Encode(packages); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }
+		if err := encoder.Encode(packages.Items()); err != nil {
+			log.Fatal(err)
+		}
+	}
 }

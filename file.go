@@ -83,7 +83,7 @@ func (f *File) parsePackage() {
 // Imports field.
 func (f *File) parseImports() {
 	for _, imp := range f.astFile.Imports {
-		f.Imports = append(f.Imports, imp.Path.Value)
+		f.Imports = append(f.Imports, strings.ReplaceAll(imp.Path.Value, "\"", ""))
 	}
 }
 

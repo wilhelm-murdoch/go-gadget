@@ -1,6 +1,8 @@
 package gadget
 
-import "github.com/wilhelm-murdoch/go-collection"
+import (
+	"github.com/wilhelm-murdoch/go-collection"
+)
 
 // Package represents a golang package as well as all associated files,
 // functions and other declarations.

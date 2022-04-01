@@ -1,1 +1,4 @@
 # Gadget
+
+## Packages
+{{ .Packages }}
