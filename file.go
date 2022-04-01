@@ -29,7 +29,9 @@ type File struct {
 	tokenSet      *token.FileSet
 }
 
-// NewFile
+// NewFile returns a file instance representing a file within a golang package.
+// This function creates a new token set and parser instance representing the
+// new file's abstract syntax tree ( AST ).
 func NewFile(path string) (*File, error) {
 	tokenSet := token.NewFileSet()
 	astFile, err := parser.ParseFile(tokenSet, path, nil, parser.ParseComments)
@@ -49,7 +51,10 @@ func NewFile(path string) (*File, error) {
 	}).Parse(), nil
 }
 
-// Parse
+// Parse is responsible for walking through the current file's abstract syntax
+// tree in order to populate it's fields. This includes imports, defined
+// functions and methods, structs and interfaces and other declared values.
+// ( Chainable )
 func (f *File) Parse() *File {
 	if strings.HasSuffix(f.Name, "_test.go") {
 		f.IsTest = true
@@ -65,7 +70,7 @@ func (f *File) Parse() *File {
 	return f
 }
 
-// parsePackage
+// parsePackage updates the current file with package-related data.
 func (f *File) parsePackage() {
 	f.Package = f.astFile.Name.Name
 	if f.Package == "main" {
@@ -73,14 +78,18 @@ func (f *File) parsePackage() {
 	}
 }
 
-// parseImports
+// parseImports is responsible for creating a list of package imports that have
+// been defined within the current file and assinging them to the appropriate
+// Imports field.
 func (f *File) parseImports() {
 	for _, imp := range f.astFile.Imports {
 		f.Imports = append(f.Imports, imp.Path.Value)
 	}
 }
 
-// parseFunctions
+// parseFunctions is responsible for creating abstract representations of
+// functions and methods defined within the current file. All functions are
+// added to the Functions collection.
 func (f *File) parseFunctions() {
 	f.walk(func(node ast.Node) bool {
 		switch fn := node.(type) {
@@ -99,21 +108,9 @@ func (f *File) parseFunctions() {
 	})
 }
 
-// Foo is a stupid interface. Just look at this fucking idiot!
-type Foo interface {
-	// I am on top of the blup
-	Blup(say string) string // this is for all the blups out there
-	// I am up here
-	Boop() int // fuck the boops
-}
-
-type Mammal interface {
-	getType() string
-	canFly() bool
-	feed(foodCount int) string
-}
-
-// parseInterfaces
+// parseInterfaces is responsible for creating abstract representations of
+// interfaces defined within the current file. All interfaces are added to the
+// Interfaces collection.
 func (f *File) parseInterfaces() {
 	f.walk(func(node ast.Node) bool {
 		ts, ok := node.(*ast.TypeSpec)
@@ -127,7 +124,9 @@ func (f *File) parseInterfaces() {
 	})
 }
 
-// parseStructs
+// parseInterfaces is responsible for creating abstract representations of
+// structs defined within the current file. All interfaces are added to the
+// Structs collection.
 func (f *File) parseStructs() {
 	f.walk(func(node ast.Node) bool {
 		ts, ok := node.(*ast.TypeSpec)
@@ -141,7 +140,9 @@ func (f *File) parseStructs() {
 	})
 }
 
-// parseValues
+// parseValues is responsible for creating abstract representations of various
+// general values such as const and var blocks. All values are added to the
+// Values collection.
 func (f *File) parseValues() {
 	f.walk(func(node ast.Node) bool {
 		switch gn := node.(type) {
@@ -154,7 +155,14 @@ func (f *File) parseValues() {
 	})
 }
 
-// walk
+// walk implements the walk interface which is used to step through syntax
+// trees via a caller-supplied callback.
 func (f *File) walk(fn func(ast.Node) bool) {
 	ast.Walk(walker(fn), f.astFile)
+}
+
+// String implements the Stringer interface and returns the current files's
+// path.
+func (f *File) String() string {
+	return f.Path
 }

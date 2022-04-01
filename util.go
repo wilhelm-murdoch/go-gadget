@@ -82,10 +82,10 @@ func AdjustSource(source string, adjustBraces bool) string {
 	return strings.TrimSpace(source) // Trim all leading and trailing space
 }
 
-// walker
+// walker implements a walker interface used to traversing syntax trees.
 type walker func(ast.Node) bool
 
-// Visit
+// Visit steps through each node within the specified syntax tree.
 func (w walker) Visit(node ast.Node) ast.Visitor {
 	if w(node) {
 		return w

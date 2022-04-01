@@ -1,6 +1,7 @@
 package gadget
 
 import (
+	"fmt"
 	"go/ast"
 	"regexp"
 	"strings"
@@ -22,9 +23,8 @@ type Field struct {
 // fields with meaningful values.
 func NewField(f *ast.Field, parent *File) *Field {
 	return (&Field{
-		Name:     f.Names[len(f.Names)-1].Name,
-		Doc:      f.Doc.Text(),
-		Comment:  f.Comment.Text(),
+		Doc:      strings.TrimSpace(f.Doc.Text()),
+		Comment:  strings.TrimSpace(f.Comment.Text()),
 		Line:     parent.tokenSet.File(f.Pos()).Line(f.Pos()),
 		astField: f,
 		parent:   parent,
@@ -34,6 +34,15 @@ func NewField(f *ast.Field, parent *File) *Field {
 // Parse is responsible for browsing through f.astField, f.parent to populate
 // the current fields's fields. ( Chainable )
 func (f *Field) Parse() *Field {
+	// A field can be a nested struct. So, in the absense of a field name, instead
+	// assume we're dealing with a struct and use the field's type to populate the
+	// name field.
+	if f.astField.Names != nil {
+		f.Name = f.astField.Names[len(f.astField.Names)-1].Name
+	} else {
+		f.Name = fmt.Sprintf("<nested struct>: %v", f.astField.Type)
+	}
+
 	pattern := regexp.MustCompile(`(?m)^[A-Z]{1}`)
 	if pattern.MatchString(f.Name) {
 		f.IsExported = true
@@ -46,16 +55,19 @@ func (f *Field) Parse() *Field {
 
 // parseSignature determines the position of the current field within the
 // associated source file and extracts the relevant line of code. We only want
-// the content before any inline comments.
+// the content before any inline comments. This will also replace consecutive
+// spaces with a single space.
 func (f *Field) parseSignature() {
 	line := strings.TrimSpace(string(GetLinesFromFile(f.parent.Path, f.Line, f.Line)))
 	if n := strings.IndexByte(line, '/'); n >= 0 {
 		line = line[:n]
 	}
-	f.Signature = line
+
+	pattern := regexp.MustCompile(`\s+`)
+	f.Signature = pattern.ReplaceAllString(line, " ")
 }
 
-// String implements the Stringer inteface and returns the current fields's
+// String implements the Stringer interface and returns the current fields's
 // name.
 func (f *Field) String() string {
 	return f.Name

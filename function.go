@@ -117,7 +117,7 @@ func (f *Function) parseSignature() {
 	f.Signature = line[:len(line)-1]
 }
 
-// String implements the Stringer inteface and returns the current function's
+// String implements the Stringer interface and returns the current function's
 // signature.
 func (f *Function) String() string {
 	return f.Signature

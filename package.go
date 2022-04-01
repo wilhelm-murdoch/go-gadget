@@ -18,7 +18,7 @@ func NewPackage(name string) *Package {
 	}
 }
 
-// String implements the Stringer inteface and returns the current package's
+// String implements the Stringer interface and returns the current package's
 // name.
 func (p *Package) String() string {
 	return p.Name

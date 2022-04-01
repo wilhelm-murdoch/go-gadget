@@ -43,7 +43,7 @@ func (i *Interface) Parse() *Interface {
 	i.parseBody()
 	i.parseSignature()
 	i.parseFields()
-	i.parseComments()
+	// i.parseComments()
 
 	return i
 }
@@ -56,40 +56,36 @@ func (i *Interface) parseLines() {
 	i.LineCount = (i.LineEnd + 1) - i.LineStart
 }
 
-// parseBody
+// parseBody attempts to make a few adjustments to the *ast.BlockStmt which
+// represents the current interface's body. We remove the opening and closing
+// braces as well as the first occurrent `\t` sequence on each line.
 func (i *Interface) parseBody() {
 	i.Body = AdjustSource(string(GetLinesFromFile(i.parent.Path, i.LineStart+1, i.LineEnd-1)), false)
 }
 
-// parseSignature
+// parseSignature attempts to determine the current interfaces's type and assigns
+// it to the Signature field of struct Function.
 func (i *Interface) parseSignature() {
 	line := strings.TrimSpace(string(GetLinesFromFile(i.parent.Path, i.LineStart, i.LineStart)))
 	i.Signature = line[:len(line)-1]
 }
 
-// parseFields
+// parseFields iterates through the interface's list of defined methods to
+// populate the Fields collection.
 func (i *Interface) parseFields() {
 	for _, field := range i.astType.Methods.List {
 		i.Fields.Push(NewField(field, i.parent))
 	}
 }
 
-// parseComments
+// parseComments is responsible for collecting and organising comments
+// representing a comment block immediately above the interface definition.
+// @TODO: Not yet implemented!
 func (i *Interface) parseComments() {
-	// if i.parent.astFile.Comments != nil {
-	// 	for _, cg := range i.parent.astFile.Comments {
-	// 		for _, c := range cg.List {
-	// 			// if c.Pos() >= i.astType.Pos() && c.End() <= i.astType.End() {
-	// 			i.Comment += fmt.Sprintf("%s\n", c.Text)
-	// 			// }
-	// 		}
-	// 	}
-	// }
-
-	// i.Comment = strings.TrimSpace(i.Comment)
+	panic("Not yet implemented.")
 }
 
-// String implements the Stringer inteface and returns the current package's
+// String implements the Stringer interface and returns the current package's
 // name.
 func (i *Interface) String() string {
 	return i.Name
