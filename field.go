@@ -1,12 +1,62 @@
 package gadget
 
+import (
+	"go/ast"
+	"regexp"
+	"strings"
+)
+
+// Field represents a field used in either a struct or an interface.
 type Field struct {
-	Name       string `json:"name"`
-	IsExported bool   `json:"is_exported"`
-	Line       int    `json:"line"`
-	Body       string `json:"body"`
+	Name       string `json:"name"`        // The name of the field.
+	IsExported bool   `json:"is_exported"` // Determines whether the field is exported.
+	Line       int    `json:"line"`        // The line number this field appears on in the associated source file.
+	Signature  string `json:"body"`        // The full definition of the field including name, arguments and return values.
+	Comment    string `json:"comment"`     // Any inline comments associated with the field.
+	Doc        string `json:"doc"`         // The comment block directly above this field's definition.
+	astField   *ast.Field
+	parent     *File
 }
 
+// NewField returns a field instance and attempts to populate all associated
+// fields with meaningful values.
+func NewField(f *ast.Field, parent *File) *Field {
+	return (&Field{
+		Name:     f.Names[len(f.Names)-1].Name,
+		Doc:      f.Doc.Text(),
+		Comment:  f.Comment.Text(),
+		Line:     parent.tokenSet.File(f.Pos()).Line(f.Pos()),
+		astField: f,
+		parent:   parent,
+	}).Parse()
+}
+
+// Parse is responsible for browsing through f.astField, f.parent to populate
+// the current fields's fields. ( Chainable )
+func (f *Field) Parse() *Field {
+	pattern := regexp.MustCompile(`(?m)^[A-Z]{1}`)
+	if pattern.MatchString(f.Name) {
+		f.IsExported = true
+	}
+
+	f.parseSignature()
+
+	return f
+}
+
+// parseSignature determines the position of the current field within the
+// associated source file and extracts the relevant line of code. We only want
+// the content before any inline comments.
+func (f *Field) parseSignature() {
+	line := strings.TrimSpace(string(GetLinesFromFile(f.parent.Path, f.Line, f.Line)))
+	if n := strings.IndexByte(line, '/'); n >= 0 {
+		line = line[:n]
+	}
+	f.Signature = line
+}
+
+// String implements the Stringer inteface and returns the current fields's
+// name.
 func (f *Field) String() string {
 	return f.Name
 }

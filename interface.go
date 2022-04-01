@@ -2,38 +2,91 @@ package gadget
 
 import (
 	"go/ast"
-	"go/token"
+	"strings"
 
 	"github.com/wilhelm-murdoch/go-collection"
 )
 
+// Interface represents a golang interface definition.
 type Interface struct {
-	Name      string `json:"name"`
-	LineStart int    `json:"line_start"`
-	LineEnd   int    `json:"line_end"`
-	LineCount int    `json:"line_count"`
-	Fields    *collection.Collection[*Field]
+	Name      string                         `json:"name"`       // The name of the interface.
+	LineStart int                            `json:"line_start"` // The line number in the associated source file where this interface is initially defined.
+	LineEnd   int                            `json:"line_end"`   // The line number in the associated source file where the definition block ends.
+	LineCount int                            `json:"line_count"` // The total number of lines, including body, the interface occupies.
+	Comment   string                         `json:"comment"`    // Any inline comments associated with the interface.
+	Doc       string                         `json:"doc"`        // The comment block directly above this interface's definition.
+	Signature string                         `json:"signature"`  // The full definition of the interface itself.
+	Body      string                         `json:"body"`       // The full body of the interface sourced directly from the associated file; comments included.
+	Fields    *collection.Collection[*Field] `json:"fields"`     // A collection of fields and their associated metadata.
 	astType   *ast.InterfaceType
 	astSpec   *ast.TypeSpec
-	tokenSet  *token.FileSet
-	astFile   *ast.File
+	parent    *File
 }
 
-func NewInterface(it *ast.InterfaceType, ts *ast.TypeSpec, fs *token.FileSet, f *ast.File) *Interface {
+// NewInterface returns an interface instance and attempts to populate all
+// associated fields with meaningful values.
+func NewInterface(it *ast.InterfaceType, ts *ast.TypeSpec, parent *File) *Interface {
 	return (&Interface{
-		Fields:   collection.New[*Field](),
-		astType:  it,
-		astSpec:  ts,
-		tokenSet: fs,
-		astFile:  f,
+		Name:    ts.Name.Name,
+		Fields:  collection.New[*Field](),
+		Doc:     ts.Doc.Text(),
+		astType: it,
+		astSpec: ts,
+		parent:  parent,
 	}).Parse()
 }
 
+// Parse is responsible for browsing through f.astSpec, f.astType, f.parent to
+// populate the current interface's fields. ( Chainable )
 func (i *Interface) Parse() *Interface {
-	if i.astSpec != nil {
-		i.Name = i.astSpec.Name.Name
-	}
+	i.parseLines()
+	i.parseBody()
+	i.parseSignature()
+	i.parseFields()
+	i.parseComments()
+
 	return i
+}
+
+// parseLines determines the current interface's opening and closing line
+// positions.
+func (i *Interface) parseLines() {
+	i.LineStart = i.parent.tokenSet.File(i.astSpec.Pos()).Line(i.astSpec.Pos())
+	i.LineEnd = i.parent.tokenSet.Position(i.astSpec.End()).Line
+	i.LineCount = (i.LineEnd + 1) - i.LineStart
+}
+
+// parseBody
+func (i *Interface) parseBody() {
+	i.Body = AdjustSource(string(GetLinesFromFile(i.parent.Path, i.LineStart+1, i.LineEnd-1)), false)
+}
+
+// parseSignature
+func (i *Interface) parseSignature() {
+	line := strings.TrimSpace(string(GetLinesFromFile(i.parent.Path, i.LineStart, i.LineStart)))
+	i.Signature = line[:len(line)-1]
+}
+
+// parseFields
+func (i *Interface) parseFields() {
+	for _, field := range i.astType.Methods.List {
+		i.Fields.Push(NewField(field, i.parent))
+	}
+}
+
+// parseComments
+func (i *Interface) parseComments() {
+	// if i.parent.astFile.Comments != nil {
+	// 	for _, cg := range i.parent.astFile.Comments {
+	// 		for _, c := range cg.List {
+	// 			// if c.Pos() >= i.astType.Pos() && c.End() <= i.astType.End() {
+	// 			i.Comment += fmt.Sprintf("%s\n", c.Text)
+	// 			// }
+	// 		}
+	// 	}
+	// }
+
+	// i.Comment = strings.TrimSpace(i.Comment)
 }
 
 // String implements the Stringer inteface and returns the current package's

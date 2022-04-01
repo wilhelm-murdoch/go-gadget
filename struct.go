@@ -2,7 +2,6 @@ package gadget
 
 import (
 	"go/ast"
-	"go/token"
 
 	"github.com/wilhelm-murdoch/go-collection"
 )
@@ -15,21 +14,20 @@ type Struct struct {
 	Fields    *collection.Collection[*Field]
 	astType   *ast.StructType
 	astSpec   *ast.TypeSpec
-	tokenSet  *token.FileSet
-	astFile   *ast.File
+	parent    *File
 }
 
-func NewStruct(st *ast.StructType, ts *ast.TypeSpec, fs *token.FileSet, f *ast.File) *Struct {
+func NewStruct(st *ast.StructType, ts *ast.TypeSpec, parent *File) *Struct {
 	return (&Struct{
-		Fields:   collection.New[*Field](),
-		astType:  st,
-		astSpec:  ts,
-		tokenSet: fs,
-		astFile:  f,
+		Fields:  collection.New[*Field](),
+		astType: st,
+		astSpec: ts,
+		parent:  parent,
 	}).Parse()
 }
 
 func (s *Struct) Parse() *Struct {
+	s.Name = s.astSpec.Name.Name
 	return s
 }
 

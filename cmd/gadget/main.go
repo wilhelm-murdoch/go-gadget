@@ -52,10 +52,13 @@ func main() {
 	}
 
 	packages.Each(func(i int, p *gadget.Package) bool {
-		fmt.Println("package:", p.Name)
 		p.Files.Each(func(i int, f *gadget.File) bool {
 			f.Interfaces.Each(func(i int, t *gadget.Interface) bool {
-				fmt.Println("-- type:", t)
+				fmt.Println("-- interface:", t)
+				return false
+			})
+			f.Structs.Each(func(i int, t *gadget.Struct) bool {
+				// fmt.Println("-- struct:", t)
 				return false
 			})
 			return false

@@ -1,7 +1,6 @@
 package gadget
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -11,21 +10,21 @@ import (
 	"github.com/wilhelm-murdoch/go-collection"
 )
 
-// Struct File represents a file containing Go code.
+// File represents a single file containing golang code.
 type File struct {
-	Name          string                             `json:"name"`
-	Path          string                             `json:"path"`
-	Package       string                             `json:"package"`
-	IsMain        bool                               `json:"is_main"`
-	IsTest        bool                               `json:"is_test"`
-	HasTests      bool                               `json:"has_tests"`
-	HasBenchmarks bool                               `json:"has_benchmarks"`
-	HasExamples   bool                               `json:"has_examples"`
-	Imports       []string                           `json:"imports"`
-	Values        *collection.Collection[*Value]     `json:"values"`
-	Functions     *collection.Collection[*Function]  `json:"functions"`
-	Interfaces    *collection.Collection[*Interface] `json:"interfaces"`
-	Structs       *collection.Collection[*Struct]    `json:"structs"`
+	Name          string                             `json:"name"`           // The basename of the file.
+	Path          string                             `json:"path"`           // The full path to the file as specified by the caller.
+	Package       string                             `json:"package"`        // The name of the golang package associated with this file.
+	IsMain        bool                               `json:"is_main"`        // Determines whether this file is part of package main.
+	IsTest        bool                               `json:"is_test"`        // Determines whether this file is for golang tests.
+	HasTests      bool                               `json:"has_tests"`      // Determines whether this file contains golang tests.
+	HasBenchmarks bool                               `json:"has_benchmarks"` // Determines whether this file contains benchmark tests.
+	HasExamples   bool                               `json:"has_examples"`   // Determines whether this file contains example tests.
+	Imports       []string                           `json:"imports"`        // A list of strings containing all the current file's package imports.
+	Values        *collection.Collection[*Value]     `json:"values"`         // A collection of declared golang values.
+	Functions     *collection.Collection[*Function]  `json:"functions"`      // A collection of declared golang functions.
+	Interfaces    *collection.Collection[*Interface] `json:"interfaces"`     // A collection of declared golang interfaces.
+	Structs       *collection.Collection[*Struct]    `json:"structs"`        // A collection of declared golang structs.
 	astFile       *ast.File
 	tokenSet      *token.FileSet
 }
@@ -46,6 +45,7 @@ func NewFile(path string) (*File, error) {
 		Values:     collection.New[*Value](),
 		Functions:  collection.New[*Function](),
 		Interfaces: collection.New[*Interface](),
+		Structs:    collection.New[*Struct](),
 	}).Parse(), nil
 }
 
@@ -59,6 +59,7 @@ func (f *File) Parse() *File {
 	f.parseImports()
 	f.parseFunctions()
 	f.parseInterfaces()
+	f.parseStructs()
 	f.parseValues()
 
 	return f
@@ -92,41 +93,48 @@ func (f *File) parseFunctions() {
 				f.HasTests = true
 			}
 
-			f.Functions.Push(NewFunction(fn, f.tokenSet, f.astFile, f))
+			f.Functions.Push(NewFunction(fn, f))
 		}
 		return true
 	})
 }
 
+// Foo is a stupid interface. Just look at this fucking idiot!
+type Foo interface {
+	// I am on top of the blup
+	Blup(say string) string // this is for all the blups out there
+	// I am up here
+	Boop() int // fuck the boops
+}
+
+type Mammal interface {
+	getType() string
+	canFly() bool
+	feed(foodCount int) string
+}
+
 // parseInterfaces
 func (f *File) parseInterfaces() {
 	f.walk(func(node ast.Node) bool {
-		switch tp := node.(type) {
-		case *ast.TypeSpec:
-			iface, ok := tp.Type.(*ast.InterfaceType)
-			if ok {
-				fmt.Println("u")
-				f.Interfaces.Push(NewInterface(iface, tp, f.tokenSet, f.astFile))
+		ts, ok := node.(*ast.TypeSpec)
+		if ok {
+			if iface, ok := ts.Type.(*ast.InterfaceType); ok {
+				f.Interfaces.Push(NewInterface(iface, ts, f))
 			}
 		}
+
 		return true
 	})
 }
 
 // parseStructs
 func (f *File) parseStructs() {
-	var typeSpec *ast.TypeSpec
-	var structType *ast.StructType
 	f.walk(func(node ast.Node) bool {
-		switch tp := node.(type) {
-		case *ast.TypeSpec:
-			typeSpec = tp
-		case *ast.StructType:
-			structType = tp
-		}
-
-		if typeSpec != nil && structType != nil {
-			f.Structs.Push(NewStruct(structType, typeSpec, f.tokenSet, f.astFile))
+		ts, ok := node.(*ast.TypeSpec)
+		if ok {
+			if st, ok := ts.Type.(*ast.StructType); ok {
+				f.Structs.Push(NewStruct(st, ts, f))
+			}
 		}
 
 		return true
@@ -139,7 +147,7 @@ func (f *File) parseValues() {
 		switch gn := node.(type) {
 		case *ast.ValueSpec:
 			for _, ident := range gn.Names {
-				f.Values.Push(NewValue(ident, f.tokenSet, f))
+				f.Values.Push(NewValue(ident, f))
 			}
 		}
 		return true
@@ -149,15 +157,4 @@ func (f *File) parseValues() {
 // walk
 func (f *File) walk(fn func(ast.Node) bool) {
 	ast.Walk(walker(fn), f.astFile)
-}
-
-// walker
-type walker func(ast.Node) bool
-
-// Visit
-func (w walker) Visit(node ast.Node) ast.Visitor {
-	if w(node) {
-		return w
-	}
-	return nil
 }

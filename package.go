@@ -5,8 +5,8 @@ import "github.com/wilhelm-murdoch/go-collection"
 // Package represents a golang package as well as all associated files,
 // functions and other declarations.
 type Package struct {
-	Name  string                        `json:"name"`
-	Files *collection.Collection[*File] `json:"files"`
+	Name  string                        `json:"name"`  // The name of the current package.
+	Files *collection.Collection[*File] `json:"files"` // A collection of golang files associated with this package.
 }
 
 // NewPackage returns a Package instance with an initialised collection used for

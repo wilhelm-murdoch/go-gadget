@@ -2,11 +2,13 @@ package gadget
 
 import (
 	"bufio"
+	"go/ast"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 // GetLinesFromFile creates a byte reader for the file at the target path and
@@ -60,4 +62,33 @@ func WalkGoFiles(path *string) (files []string) {
 	})
 
 	return
+}
+
+// AdjustSource is a convenience function that strips the opening and closing
+// braces of a function's ( or other things ) body and removes the first `\t`
+// character on each remaining line.
+func AdjustSource(source string, adjustBraces bool) string {
+	var pattern *regexp.Regexp
+
+	// Remove first leading tab character:
+	pattern = regexp.MustCompile(`(?m)^\t{1}`)
+	source = pattern.ReplaceAllString(source, "")
+
+	if adjustBraces {
+		source = source[:len(source)-1] // Remove trailing } brace
+		source = source[1:]             // Remove leading { brace
+	}
+
+	return strings.TrimSpace(source) // Trim all leading and trailing space
+}
+
+// walker
+type walker func(ast.Node) bool
+
+// Visit
+func (w walker) Visit(node ast.Node) ast.Visitor {
+	if w(node) {
+		return w
+	}
+	return nil
 }
