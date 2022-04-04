@@ -7,25 +7,27 @@ import (
 	"go/format"
 	"go/token"
 	"log"
+	"regexp"
 	"strings"
 )
 
 // Function represents a golang function or method along with meaningful fields.
 type Function struct {
-	Name        string      `json:"name"`         // The name of the function.
-	IsTest      bool        `json:"is_test"`      // Determines whether this is a test.
-	IsBenchmark bool        `json:"is_benchmark"` // Determines whether this is a benchmark.
-	IsExample   bool        `json:"is_example"`   // Determines whether this is an example.
-	IsExported  bool        `json:"is_exported"`  // Determines whether this function is exported.
-	Examples    []*Function `json:"examples"`     // Any example functions of this function will be added to this list.
-	Comment     string      `json:"comment"`      // Any inline comments associated with the function.
-	Doc         string      `json:"doc"`          // The comment block directly above this funciton's definition.
-	Output      string      `json:"output"`       // If IsExample is true, this field will contain the comment block defining expected output.
-	Body        string      `json:"body"`         // The body of this function; everything contained within the opening and closing braces.
-	Signature   string      `json:"signature"`    // The full definition of the function including receiver, name, arguments and return values.
-	LineStart   int         `json:"line_start"`   // The line number in the associated source file where this function is initially defined.
-	LineEnd     int         `json:"line_end"`     // The line number in the associated source file where the definition block ends.
-	LineCount   int         `json:"line_count"`   // The total number of lines, including body, the interface occupies.
+	Name        string `json:"name"`               // The name of the function.
+	IsTest      bool   `json:"is_test"`            // Determines whether this is a test.
+	IsBenchmark bool   `json:"is_benchmark"`       // Determines whether this is a benchmark.
+	IsExample   bool   `json:"is_example"`         // Determines whether this is an example.
+	IsExported  bool   `json:"is_exported"`        // Determines whether this function is exported.
+	IsMethod    bool   `json:"is_method"`          // Determines whether this a method. This will be true if this function has a receiver.
+	Receiver    string `json:"reciever,omitempty"` // If this method has a receiver, this field will refer to the name of the associated struct.
+	Comment     string `json:"comment,omitempty"`  // Any inline comments associated with the function.
+	Doc         string `json:"doc,omitempty"`      // The comment block directly above this funciton's definition.
+	Output      string `json:"output,omitempty"`   // If IsExample is true, this field should contain the comment block defining expected output.
+	Body        string `json:"body"`               // The body of this function; everything contained within the opening and closing braces.
+	Signature   string `json:"signature"`          // The full definition of the function including receiver, name, arguments and return values.
+	LineStart   int    `json:"line_start"`         // The line number in the associated source file where this function is initially defined.
+	LineEnd     int    `json:"line_end"`           // The line number in the associated source file where the definition block ends.
+	LineCount   int    `json:"line_count"`         // The total number of lines, including body, the interface occupies.
 	astFunc     *ast.FuncDecl
 	parent      *File
 }
@@ -57,6 +59,7 @@ func (f *Function) Parse() *Function {
 	f.parseLines()
 	f.parseBody()
 	f.parseSignature()
+	f.parseReceiver()
 
 	if f.IsExample {
 		f.parseOutput()
@@ -65,17 +68,48 @@ func (f *Function) Parse() *Function {
 	return f
 }
 
+// parseReceiver
+func (f *Function) parseReceiver() {
+	var receiver func(ast.Expr) string
+
+	receiver = func(recv ast.Expr) string {
+		switch t := recv.(type) {
+		case *ast.Ident:
+			return t.Name
+		case *ast.StarExpr:
+			return receiver(t.X)
+		case *ast.IndexExpr:
+			return fmt.Sprintf(receiver(t.X))
+		}
+		return ""
+	}
+
+	if f.astFunc.Recv != nil && len(f.astFunc.Recv.List) > 0 {
+		f.IsMethod = true
+
+		for _, l := range f.astFunc.Recv.List {
+			star, ok := l.Type.(*ast.StarExpr)
+			if !ok {
+				continue
+			}
+
+			f.Receiver = receiver(star)
+		}
+	}
+}
+
 // parseOutput attempts to fetch the expected output block for an example
 // function and pins it to the current Function for future reference. It assumes
 // all comments immediately following the position of string "// Output:"
 // belong to the output block.
 func (f *Function) parseOutput() {
 	var outputPos token.Pos
+	pattern := regexp.MustCompile(`(?i)//[[:space:]]*(unordered )?output:`)
 	if f.parent.astFile.Comments != nil {
 		for _, cg := range f.parent.astFile.Comments {
 			for _, c := range cg.List {
 				if c.Pos() >= f.astFunc.Pos() && c.End() <= f.astFunc.End() {
-					if strings.HasSuffix(c.Text, "// Output:") {
+					if pattern.MatchString(c.Text) {
 						outputPos = c.Pos()
 					}
 

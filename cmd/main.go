@@ -16,23 +16,32 @@ import (
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
+const (
+	// Version describes the version of the current build.
+	Version = "dev"
+
+	// Commit describes the commit of the current build.
+	Commit = "none"
+
+	// Date describes the date of the current build.
+	Date = "unknown"
+
+	// Release describes the stage of the current build, eg; development, production, etc...
+	Stage = "unknown"
+)
+
 var (
-	Version = "v0.0.1"
-	Release = "development"
-	Sha     = "xxxxxxxx"
+	flagSource  = flag.String("source", "*.go", "The directory to search for *.go files.")
+	flgTemplate = flag.String("template", "README.tpl", "The path to the template you would like to evaluate.")
+	flgFormat   = flag.String("format", "json", "Chosen output format; json, template or debug.")
+	flgVersion  = flag.Bool("version", false, "Current version of gadget.")
 )
 
 func main() {
-	var (
-		flagSource  = flag.String("source", "*.go", "The directory to search for *.go files.")
-		flgTemplate = flag.String("template", "README.tpl", "The path to the template you would like to evaluate.")
-		flgFormat   = flag.String("format", "json", "Chosen output format; json, template or debug.")
-		flgVersion  = flag.Bool("version", false, "Current version of gadget.")
-	)
 	flag.Parse()
 
 	if *flgVersion {
-		fmt.Printf("Version: %s, Release: %s, Sha: %s\n", Version, Release, Sha)
+		fmt.Printf("Version: %s, Stage: %s, Commit: %s\n, Built On: %s", Version, Stage, Commit, Date)
 		os.Exit(0)
 	}
 
@@ -58,21 +67,6 @@ func main() {
 		packages.Push(p)
 	}
 
-	// packages.Each(func(i int, p *gadget.Package) bool {
-	// 	p.Files.Each(func(i int, f *gadget.File) bool {
-	// 		f.Structs.Each(func(i int, s *gadget.Struct) bool {
-	// 			fmt.Println("-- struct:", s, s.LineCount, s.Doc, s.Comment)
-	// 			s.Fields.Each(func(i int, f *gadget.Field) bool {
-	// 				fmt.Println("---- field:", f.Name, f.Comment)
-	// 				return false
-	// 			})
-	// 			return false
-	// 		})
-	// 		return false
-	// 	})
-	// 	return false
-	// })
-
 	switch *flgFormat {
 	case "debug":
 		spew.Dump(packages)
@@ -83,7 +77,7 @@ func main() {
 		)
 
 		var buffer strings.Builder
-		if err := tpl.Execute(os.Stdout, &buffer); err != nil {
+		if err := tpl.Execute(&buffer, packages.Items()); err != nil {
 			log.Fatal(err)
 		}
 

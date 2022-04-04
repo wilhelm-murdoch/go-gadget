@@ -27,15 +27,15 @@ func NewValue(id *ast.Ident, parent *File) *Value {
 
 // Parse is responsible for browsing through f.astIdent and f.tokenSet to
 // populate the current value's fields. ( Chainable )
-func (g *Value) Parse() *Value {
-	g.Line = g.parent.tokenSet.File(g.astIdent.Pos()).Line(g.astIdent.Pos())
-	g.Body = strings.TrimSpace(string(GetLinesFromFile(g.parent.Path, g.Line, g.Line)))
+func (v *Value) Parse() *Value {
+	v.Line = v.parent.tokenSet.File(v.astIdent.Pos()).Line(v.astIdent.Pos())
+	v.Body = strings.TrimSpace(string(GetLinesFromFile(v.parent.Path, v.Line, v.Line)))
 
-	return g
+	return v
 }
 
 // String implements the Stringer interface and returns the current values's
 // body.
-func (g *Value) String() string {
-	return g.Body
+func (v *Value) String() string {
+	return v.Body
 }

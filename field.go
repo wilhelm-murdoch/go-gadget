@@ -9,12 +9,12 @@ import (
 
 // Field represents a field used in either a struct or an interface.
 type Field struct {
-	Name       string `json:"name"`        // The name of the field.
-	IsExported bool   `json:"is_exported"` // Determines whether the field is exported.
-	Line       int    `json:"line"`        // The line number this field appears on in the associated source file.
-	Signature  string `json:"body"`        // The full definition of the field including name, arguments and return values.
-	Comment    string `json:"comment"`     // Any inline comments associated with the field.
-	Doc        string `json:"doc"`         // The comment block directly above this field's definition.
+	Name       string `json:"name"`              // The name of the field.
+	IsExported bool   `json:"is_exported"`       // Determines whether the field is exported.
+	Line       int    `json:"line"`              // The line number this field appears on in the associated source file.
+	Signature  string `json:"body"`              // The full definition of the field including name, arguments and return values.
+	Comment    string `json:"comment,omitempty"` // Any inline comments associated with the field.
+	Doc        string `json:"doc,omitempty"`     // The comment block directly above this field's definition.
 	astField   *ast.Field
 	parent     *File
 }

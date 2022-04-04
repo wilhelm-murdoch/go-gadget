@@ -12,19 +12,18 @@ import (
 
 // File represents a single file containing golang code.
 type File struct {
-	Name          string                             `json:"name"`           // The basename of the file.
-	Path          string                             `json:"path"`           // The full path to the file as specified by the caller.
-	Package       string                             `json:"package"`        // The name of the golang package associated with this file.
-	IsMain        bool                               `json:"is_main"`        // Determines whether this file is part of package main.
-	IsTest        bool                               `json:"is_test"`        // Determines whether this file is for golang tests.
-	HasTests      bool                               `json:"has_tests"`      // Determines whether this file contains golang tests.
-	HasBenchmarks bool                               `json:"has_benchmarks"` // Determines whether this file contains benchmark tests.
-	HasExamples   bool                               `json:"has_examples"`   // Determines whether this file contains example tests.
-	Imports       []string                           `json:"imports"`        // A list of strings containing all the current file's package imports.
-	Values        *collection.Collection[*Value]     `json:"values"`         // A collection of declared golang values.
-	Functions     *collection.Collection[*Function]  `json:"functions"`      // A collection of declared golang functions.
-	Interfaces    *collection.Collection[*Interface] `json:"interfaces"`     // A collection of declared golang interfaces.
-	Structs       *collection.Collection[*Struct]    `json:"structs"`        // A collection of declared golang structs.
+	Name          string                            `json:"name"`           // The basename of the file.
+	Path          string                            `json:"path"`           // The full path to the file as specified by the caller.
+	Package       string                            `json:"package"`        // The name of the golang package associated with this file.
+	IsMain        bool                              `json:"is_main"`        // Determines whether this file is part of package main.
+	IsTest        bool                              `json:"is_test"`        // Determines whether this file is for golang tests.
+	HasTests      bool                              `json:"has_tests"`      // Determines whether this file contains golang tests.
+	HasBenchmarks bool                              `json:"has_benchmarks"` // Determines whether this file contains benchmark tests.
+	HasExamples   bool                              `json:"has_examples"`   // Determines whether this file contains example tests.
+	Imports       []string                          `json:"imports"`        // A list of strings containing all the current file's package imports.
+	Values        *collection.Collection[*Value]    `json:"values"`         // A collection of declared golang values.
+	Functions     *collection.Collection[*Function] `json:"functions"`      // A collection of declared golang functions.
+	Types         *collection.Collection[*Type]     `json:"types"`          // A collection of declared golang types.
 	astFile       *ast.File
 	tokenSet      *token.FileSet
 }
@@ -40,14 +39,13 @@ func NewFile(path string) (*File, error) {
 	}
 
 	return (&File{
-		Name:       filepath.Base(path),
-		Path:       path,
-		astFile:    astFile,
-		tokenSet:   tokenSet,
-		Values:     collection.New[*Value](),
-		Functions:  collection.New[*Function](),
-		Interfaces: collection.New[*Interface](),
-		Structs:    collection.New[*Struct](),
+		Name:      filepath.Base(path),
+		Path:      path,
+		astFile:   astFile,
+		tokenSet:  tokenSet,
+		Values:    collection.New[*Value](),
+		Functions: collection.New[*Function](),
+		Types:     collection.New[*Type](),
 	}).Parse(), nil
 }
 
@@ -63,8 +61,7 @@ func (f *File) Parse() *File {
 	f.parsePackage()
 	f.parseImports()
 	f.parseFunctions()
-	f.parseInterfaces()
-	f.parseStructs()
+	f.parseTypes()
 	f.parseValues()
 
 	return f
@@ -108,32 +105,13 @@ func (f *File) parseFunctions() {
 	})
 }
 
-// parseInterfaces is responsible for creating abstract representations of
-// interfaces defined within the current file. All interfaces are added to the
-// Interfaces collection.
-func (f *File) parseInterfaces() {
+// parseTypes is responsible for creating abstract representations of declared
+// golang types defined within the current file. All findings are added to the
+// Types collection.
+func (f *File) parseTypes() {
 	f.walk(func(node ast.Node) bool {
-		ts, ok := node.(*ast.TypeSpec)
-		if ok {
-			if iface, ok := ts.Type.(*ast.InterfaceType); ok {
-				f.Interfaces.Push(NewInterface(iface, ts, f))
-			}
-		}
-
-		return true
-	})
-}
-
-// parseInterfaces is responsible for creating abstract representations of
-// structs defined within the current file. All interfaces are added to the
-// Structs collection.
-func (f *File) parseStructs() {
-	f.walk(func(node ast.Node) bool {
-		ts, ok := node.(*ast.TypeSpec)
-		if ok {
-			if st, ok := ts.Type.(*ast.StructType); ok {
-				f.Structs.Push(NewStruct(st, ts, f))
-			}
+		if ts, ok := node.(*ast.TypeSpec); ok {
+			f.Types.Push(NewType(ts, f))
 		}
 
 		return true
