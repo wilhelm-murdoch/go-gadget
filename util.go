@@ -48,20 +48,20 @@ func GetLinesFromFile(path string, from, to int) []byte {
 // WalkGoFiles recursively moves through the directory tree specified by `path`
 // providing a slice of files matching the `*.go` extention. Explicitly
 // specifying a file will return that file.
-func WalkGoFiles(path *string) (files []string) {
+func WalkGoFiles(path string) (files []string) {
 	pattern, err := regexp.Compile(".+\\.go$")
 	if err != nil {
-		return
+		return files
 	}
 
-	filepath.WalkDir(*path, func(path string, dir fs.DirEntry, err error) error {
+	filepath.WalkDir(path, func(path string, dir fs.DirEntry, err error) error {
 		if err == nil && pattern.MatchString(dir.Name()) {
 			files = append(files, path)
 		}
 		return nil
 	})
 
-	return
+	return files
 }
 
 // AdjustSource is a convenience function that strips the opening and closing

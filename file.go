@@ -139,8 +139,7 @@ func (f *File) walk(fn func(ast.Node) bool) {
 	ast.Walk(walker(fn), f.astFile)
 }
 
-// String implements the Stringer interface and returns the current files's
-// path.
+// String implements the Stringer struct and returns the current package's name.
 func (f *File) String() string {
 	return f.Path
 }

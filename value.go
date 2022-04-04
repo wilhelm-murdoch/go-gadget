@@ -34,8 +34,7 @@ func (v *Value) Parse() *Value {
 	return v
 }
 
-// String implements the Stringer interface and returns the current values's
-// body.
+// String implements the Stringer struct and returns the current package's name.
 func (v *Value) String() string {
 	return v.Body
 }

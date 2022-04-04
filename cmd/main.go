@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Masterminds/sprig"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/urfave/cli/v2"
 	"github.com/wilhelm-murdoch/go-collection"
 	"github.com/wilhelm-murdoch/go-gadget"
 )
@@ -30,24 +32,64 @@ const (
 	Stage = "unknown"
 )
 
-var (
-	flagSource  = flag.String("source", "*.go", "The directory to search for *.go files.")
-	flgTemplate = flag.String("template", "README.tpl", "The path to the template you would like to evaluate.")
-	flgFormat   = flag.String("format", "json", "Chosen output format; json, template or debug.")
-	flgVersion  = flag.Bool("version", false, "Current version of gadget.")
-)
-
 func main() {
-	flag.Parse()
-
-	if *flgVersion {
-		fmt.Printf("Version: %s, Stage: %s, Commit: %s\n, Built On: %s", Version, Stage, Commit, Date)
-		os.Exit(0)
+	cli.VersionPrinter = func(c *cli.Context) {
+		fmt.Printf("Version: %s, Stage: %s, Commit: %s, Date: %s\n", Version, Stage, Commit, Date)
 	}
 
+	cli.VersionFlag = &cli.BoolFlag{
+		Name:    "version",
+		Usage:   "print only the version",
+		Aliases: []string{"v"},
+	}
+
+	app := &cli.App{
+		Name:     "gadget",
+		Usage:    "inspect your code via a small layer of abstraction over Go's AST package",
+		Version:  Version,
+		Compiled: time.Now(),
+		Authors: []*cli.Author{{
+			Name:  "Wilhelm Murdoch",
+			Email: "wilhelm@devilmayco.de",
+		}},
+		Copyright: "(c) 2022 Wilhelm Codes ( https://wilhelm.codes )",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "source",
+				Usage:   "path to the target go source file, or directory containing go source files.",
+				Value:   ".",
+				Aliases: []string{"s"},
+			},
+			&cli.StringFlag{
+				Name:    "format",
+				Usage:   "the output format of the results as json, template or debug.",
+				Value:   "json",
+				Aliases: []string{"f"},
+			},
+			&cli.StringFlag{
+				Name:    "template",
+				Usage:   "if the template format is selected, this is the path to the template file to use.",
+				Value:   "README.tpl",
+				Aliases: []string{"t"},
+			},
+		},
+		Action: actionRootHandler,
+	}
+
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func actionRootHandler(c *cli.Context) error {
 	packages := collection.New[*gadget.Package]()
 
-	for _, path := range gadget.WalkGoFiles(flagSource) {
+	files := gadget.WalkGoFiles(c.String("source"))
+	if len(files) == 0 {
+		return errors.New("could not find any matching files ending in *.go")
+	}
+
+	for _, path := range files {
 		f, err := gadget.NewFile(path)
 		if err != nil {
 			fmt.Println(err)
@@ -67,28 +109,29 @@ func main() {
 		packages.Push(p)
 	}
 
-	switch *flgFormat {
+	switch c.String("format") {
 	case "debug":
 		spew.Dump(packages)
-		os.Exit(0)
 	case "template":
-		tpl := template.Must(
-			template.New(*flgTemplate).Funcs(sprig.FuncMap()).ParseFiles(*flgTemplate),
-		)
+		tpl, err := template.New(c.String("template")).Funcs(sprig.FuncMap()).ParseFiles(c.String("template"))
+		if err != nil {
+			return err
+		}
 
 		var buffer strings.Builder
 		if err := tpl.Execute(&buffer, packages.Items()); err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		fmt.Print(html.UnescapeString(buffer.String()))
+		fmt.Println(html.UnescapeString(buffer.String()))
 	default:
 		fallthrough
 	case "json":
 		encoder := json.NewEncoder(os.Stdout)
-
 		if err := encoder.Encode(packages.Items()); err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
+
+	return nil
 }

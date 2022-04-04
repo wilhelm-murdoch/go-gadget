@@ -14,6 +14,9 @@ go get github.com/wilhelm-murdoch/go-collection
 * `{{ $path }}:{{ .LineStart }}-{{ .LineEnd }}` [#]({{ $path }}#L{{ .LineStart }}-L{{ .LineEnd }})
 
 {{ .Comment | replace "\n" " " }}
+```go
+{{ .Body }}
+```
 {{ end }}{{ end }}{{ end }}{{ end }}
 # License
 Copyright © {{ now | date "2006" }} [Wilhelm Murdoch](https://wilhelm.codes).

@@ -67,8 +67,7 @@ func (f *Field) parseSignature() {
 	f.Signature = pattern.ReplaceAllString(line, " ")
 }
 
-// String implements the Stringer interface and returns the current fields's
-// name.
+// String implements the Stringer struct and returns the current package's name.
 func (f *Field) String() string {
 	return f.Name
 }

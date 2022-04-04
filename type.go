@@ -10,6 +10,10 @@ import (
 const (
 	KIND_INTERFACE   = "interface"   // Used if the type is an interface with methods.
 	KIND_STRUCT      = "struct"      // Used if the type is a struct with fields.
+	KIND_ARRAY       = "array"       // Used for array types.
+	KIND_FUNC        = "function"    // Use function types.
+	KIND_CHAN        = "channel"     // Used for channel types.
+	KIND_MAP         = "map"         // Used for map types.
 	KIND_UNSUPPORTED = "unsupported" // Used if no matching kinds can be found.
 )
 
@@ -23,7 +27,7 @@ type Type struct {
 	Comment   string                         `json:"comment,omitempty"` // Any inline comments associated with the struct.
 	Doc       string                         `json:"doc,omitempty"`     // The comment block directly above this struct's definition.
 	Signature string                         `json:"signature"`         // The full definition of the struct itself.
-	Body      string                         `json:"body"`              // The full body of the struct sourced directly from the associated file; comments included.
+	Body      string                         `json:"body,omitempty"`    // The full body of the struct sourced directly from the associated file; comments included.
 	Fields    *collection.Collection[*Field] `json:"fields,omitempty"`  // A collection of fields and their associated metadata.
 	astSpec   *ast.TypeSpec
 	parent    *File
@@ -77,23 +81,31 @@ func (t *Type) parseSignature() {
 // parseFields iterates through the struct's list of defined methods to
 // populate the Fields collection.
 func (t *Type) parseFields() {
-	if s, ok := t.astSpec.Type.(*ast.StructType); ok {
-		for _, field := range s.Fields.List {
+	switch tp := t.astSpec.Type.(type) {
+	case *ast.StructType:
+		t.Kind = KIND_STRUCT
+		for _, field := range tp.Fields.List {
 			t.Fields.Push(NewField(field, t.parent))
 		}
-		t.Kind = KIND_STRUCT
-	} else if i, ok := t.astSpec.Type.(*ast.InterfaceType); ok {
-		for _, method := range i.Methods.List {
+	case *ast.InterfaceType:
+		t.Kind = KIND_INTERFACE
+		for _, method := range tp.Methods.List {
 			t.Fields.Push(NewField(method, t.parent))
 		}
-		t.Kind = KIND_INTERFACE
-	} else {
+	case *ast.ArrayType:
+		t.Kind = KIND_ARRAY
+	case *ast.FuncType:
+		t.Kind = KIND_FUNC
+	case *ast.ChanType:
+		t.Kind = KIND_CHAN
+	case *ast.MapType:
+		t.Kind = KIND_MAP
+	default:
 		t.Kind = KIND_UNSUPPORTED
 	}
 }
 
-// String implements the Stringer struct and returns the current package's
-// name.
+// String implements the Stringer struct and returns the current package's name.
 func (t *Type) String() string {
 	return t.Name
 }
