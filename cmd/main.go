@@ -1,21 +1,12 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"html"
-	"html/template"
 	"log"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/Masterminds/sprig"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/urfave/cli/v2"
-	"github.com/wilhelm-murdoch/go-collection"
-	"github.com/wilhelm-murdoch/go-gadget"
 )
 
 const (
@@ -79,59 +70,4 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func actionRootHandler(c *cli.Context) error {
-	packages := collection.New[*gadget.Package]()
-
-	files := gadget.WalkGoFiles(c.String("source"))
-	if len(files) == 0 {
-		return errors.New("could not find any matching files ending in *.go")
-	}
-
-	for _, path := range files {
-		f, err := gadget.NewFile(path)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		p := packages.Find(func(i int, p *gadget.Package) bool {
-			return p.Name == f.Package
-		})
-		if p != nil {
-			p.Files.Push(f)
-			continue
-		}
-
-		p = gadget.NewPackage(f.Package)
-		p.Files.Push(f)
-		packages.Push(p)
-	}
-
-	switch c.String("format") {
-	case "debug":
-		spew.Dump(packages)
-	case "template":
-		tpl, err := template.New(c.String("template")).Funcs(sprig.FuncMap()).ParseFiles(c.String("template"))
-		if err != nil {
-			return err
-		}
-
-		var buffer strings.Builder
-		if err := tpl.Execute(&buffer, packages.Items()); err != nil {
-			return err
-		}
-
-		fmt.Println(html.UnescapeString(buffer.String()))
-	default:
-		fallthrough
-	case "json":
-		encoder := json.NewEncoder(os.Stdout)
-		if err := encoder.Encode(packages.Items()); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

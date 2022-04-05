@@ -136,7 +136,7 @@ func (f *File) parseValues() {
 // walk implements the walk interface which is used to step through syntax
 // trees via a caller-supplied callback.
 func (f *File) walk(fn func(ast.Node) bool) {
-	ast.Walk(walker(fn), f.astFile)
+	ast.Walk(Walker(fn), f.astFile)
 }
 
 // String implements the Stringer struct and returns the current package's name.

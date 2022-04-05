@@ -49,11 +49,7 @@ func GetLinesFromFile(path string, from, to int) []byte {
 // providing a slice of files matching the `*.go` extention. Explicitly
 // specifying a file will return that file.
 func WalkGoFiles(path string) (files []string) {
-	pattern, err := regexp.Compile(".+\\.go$")
-	if err != nil {
-		return files
-	}
-
+	pattern, _ := regexp.Compile(".+\\.go$") // Supress errors as this expression will never fail.
 	filepath.WalkDir(path, func(path string, dir fs.DirEntry, err error) error {
 		if err == nil && pattern.MatchString(dir.Name()) {
 			files = append(files, path)
@@ -83,10 +79,10 @@ func AdjustSource(source string, adjustBraces bool) string {
 }
 
 // walker implements a walker interface used to traversing syntax trees.
-type walker func(ast.Node) bool
+type Walker func(ast.Node) bool
 
 // Visit steps through each node within the specified syntax tree.
-func (w walker) Visit(node ast.Node) ast.Visitor {
+func (w Walker) Visit(node ast.Node) ast.Visitor {
 	if w(node) {
 		return w
 	}
