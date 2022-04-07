@@ -1,4 +1,4 @@
-name: Release Gadget binaries
+name: Release
 
 on:
   release:
@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date)"
+        run: echo "::set-output name=date::$(date +'%d-%m-%Y')"
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
