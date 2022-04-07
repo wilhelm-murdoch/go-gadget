@@ -30,7 +30,7 @@ jobs:
           go-version: "1.18.x"
       - run: "go test -v ./..."
       - run: "go vet ./..."
-      - uses: wangyoucao577/go-release-action@v1.16
+      - uses: wangyoucao577/go-release-action@v1.25
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
