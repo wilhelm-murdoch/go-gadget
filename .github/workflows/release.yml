@@ -23,8 +23,13 @@ jobs:
           # - {goos: "darwin",  goarch: "arm64", runson: "macos-latest"}
     steps:
       - uses: actions/checkout@v2
-      - name: Run tests
-        run: go test -v -p=1 -timeout=0 ./...
+        with:
+          fetch-depth: 1
+      - uses: WillAbides/setup-go-faster@v1.7.0
+        with:
+          go-version: "1.18.x"
+      - run: "go test -v ./..."
+      - run: "go vet ./..."
       - uses: wangyoucao577/go-release-action@v1.16
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
