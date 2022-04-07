@@ -17,7 +17,7 @@ func TestGetLinesFromFile(t *testing.T) {
 	var found []byte
 
 	expected = "package main"
-	found = gadget.GetLinesFromFile("cmd/main.go", 1, 1)
+	found = gadget.GetLinesFromFile("cmd/gadget/main.go", 1, 1)
 	assert.Equal(t, expected, strings.TrimSpace(string(found)), "Expected the first line of target file to equal `%s`, but got `%s` instead.", expected, found)
 
 	expected = "package gadget_test"
@@ -43,9 +43,9 @@ func TestWalkGoFiles(t *testing.T) {
 	files = gadget.WalkGoFiles("cmd/not_found/")
 	assert.Equal(t, len(files), 0, "Expected to find 0 files, but got %d instead.", len(files))
 
-	files = gadget.WalkGoFiles("cmd/main.go")
+	files = gadget.WalkGoFiles("cmd/gadget/main.go")
 	assert.Equal(t, len(files), 1, "Expected to find 1 files, but got %d instead.", len(files))
-	assert.Contains(t, files, "cmd/main.go", "Expected to find `cmd/main.go`, but found `%s` instead.", files[0])
+	assert.Contains(t, files, "cmd/gadget/main.go", "Expected to find `cmd/gadget/main.go`, but found `%s` instead.", files[0])
 }
 
 func TestAdjustSource(t *testing.T) {
@@ -72,7 +72,7 @@ this is another line`
 
 func TestWalker_Visit(t *testing.T) {
 	tokenSet := token.NewFileSet()
-	astFile, _ := parser.ParseFile(tokenSet, "cmd/main.go", nil, 0)
+	astFile, _ := parser.ParseFile(tokenSet, "cmd/gadget/main.go", nil, 0)
 
 	var imports []string
 
@@ -87,7 +87,7 @@ func TestWalker_Visit(t *testing.T) {
 		return true
 	})
 
-	assert.Contains(t, imports, "fmt", "Expected `cmd/main.go` to contain the \"fmt\" import.")
+	assert.Contains(t, imports, "fmt", "Expected `cmd/gadget/main.go` to contain the \"fmt\" import.")
 
 	var count int
 	(&TestWalker{astFile}).walk(func(node ast.Node) bool {
@@ -101,7 +101,7 @@ func TestWalker_Visit(t *testing.T) {
 		return false
 	})
 
-	assert.Greater(t, count, 0, "Expected `cmd/main.go` to contain imports, but got nothing instead.")
+	assert.Greater(t, count, 0, "Expected `cmd/gadget/main.go` to contain imports, but got nothing instead.")
 }
 
 type TestWalker struct {

@@ -26,12 +26,12 @@ coverage:
 
 watch-template:
 	${BIN} run ./cmd/gadget -format template; echo "---boundary---"
-	fswatch main.go README.tpl | while read file; do ${BIN} run ./cmd/gadget --format template; echo "---boundary---"; done
+	fswatch ./cmd/gadget/main.go README.tpl | while read file; do ${BIN} run ./cmd/gadget --format template; echo "---boundary---"; done
 
 watch-json:
 	${BIN} run ./cmd/gadget | jq -r
-	fswatch main.go | while read file; do ${BIN} run ./cmd/gadget | jq -r; echo "---boundary---"; done
+	fswatch ./cmd/gadget/main.go | while read file; do ${BIN} run ./cmd/gadget | jq -r; echo "---boundary---"; done
 
 watch-debug:
 	${BIN} run ./cmd/gadget --format debug
-	fswatch main.go | while read file; do ${BIN} run ./cmd/gadget --format debug; echo "---boundary---"; done
+	fswatch ./cmd/gadget/main.go | while read file; do ${BIN} run ./cmd/gadget --format debug; echo "---boundary---"; done

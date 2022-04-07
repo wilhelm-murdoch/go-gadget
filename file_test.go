@@ -23,7 +23,7 @@ func TestNewFile(t *testing.T) {
 	file, _ = gadget.NewFile("file_test.go")
 	assert.True(t, file.IsTest, "Expected to return `true` for a test file.")
 
-	file, _ = gadget.NewFile("cmd/main.go")
+	file, _ = gadget.NewFile("cmd/gadget/main.go")
 	assert.True(t, file.IsMain, "Expected to return `true` for a main file.")
 
 	file, _ = gadget.NewFile("benchmarks_test.go")
