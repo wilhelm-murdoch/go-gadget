@@ -1,25 +1,37 @@
-BIN=go1.18
+BIN=go
 
 build:
-	${BIN} build -v .
+	${BIN} build -v ./cmd/gadget
 
 test:
 	${BIN} test -race -v .
 
+lint:
+	staticcheck -f stylish
+
 bench:
-	${BIN} test -benchmem -count 3 -bench .
+	${BIN} test -run . -bench . -benchtime 5s -count 10 -benchmem -cpuprofile cpu.out -memprofile mem.out -trace trace.out
+
+pprof-cpu:
+	${BIN} tool pprof -http :8800 cpu.out
+
+pprof-mem:
+	${BIN} tool pprof -http :8900 mem.out
+
+trace:
+	${BIN} tool trace trace.out
 
 coverage:
 	${BIN} test -v -coverprofile cover.out .
 
 watch-template:
-	${BIN} run . --path stub --format template; echo "---boundary---"
-	fswatch main.go README.tpl | while read file; do ${BIN} run . --path stub --format template; echo "---boundary---"; done
+	${BIN} run ./cmd/gadget -format template; echo "---boundary---"
+	fswatch main.go README.tpl | while read file; do ${BIN} run ./cmd/gadget --format template; echo "---boundary---"; done
 
 watch-json:
-	${BIN} run . --path stub --format json | jq -r
-	fswatch main.go | while read file; do ${BIN} run . --path stub --format json | jq -r; echo "---boundary---"; done
+	${BIN} run ./cmd/gadget | jq -r
+	fswatch main.go | while read file; do ${BIN} run ./cmd/gadget | jq -r; echo "---boundary---"; done
 
 watch-debug:
-	${BIN} run . --path stub --format debug
-	fswatch main.go | while read file; do ${BIN} run . --path stub --format debug; echo "---boundary---"; done
+	${BIN} run ./cmd/gadget --format debug
+	fswatch main.go | while read file; do ${BIN} run ./cmd/gadget --format debug; echo "---boundary---"; done

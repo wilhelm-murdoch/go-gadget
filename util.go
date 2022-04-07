@@ -49,7 +49,7 @@ func GetLinesFromFile(path string, from, to int) []byte {
 // providing a slice of files matching the `*.go` extention. Explicitly
 // specifying a file will return that file.
 func WalkGoFiles(path string) (files []string) {
-	pattern, _ := regexp.Compile(".+\\.go$") // Supress errors as this expression will never fail.
+	pattern, _ := regexp.Compile(`.+\.go$`) // Suppress errors as this expression will never fail.
 	filepath.WalkDir(path, func(path string, dir fs.DirEntry, err error) error {
 		if err == nil && pattern.MatchString(dir.Name()) {
 			files = append(files, path)
@@ -64,10 +64,8 @@ func WalkGoFiles(path string) (files []string) {
 // braces of a function's ( or other things ) body and removes the first `\t`
 // character on each remaining line.
 func AdjustSource(source string, adjustBraces bool) string {
-	var pattern *regexp.Regexp
-
 	// Remove first leading tab character:
-	pattern = regexp.MustCompile(`(?m)^\t{1}`)
+	pattern := regexp.MustCompile(`(?m)^\t{1}`)
 	source = pattern.ReplaceAllString(source, "")
 
 	if adjustBraces {

@@ -11,6 +11,7 @@ import (
 type Field struct {
 	Name       string `json:"name"`              // The name of the field.
 	IsExported bool   `json:"is_exported"`       // Determines whether the field is exported.
+	IsEmbedded bool   `json:"is_embedded"`       // Determines whether the field is an embedded type.
 	Line       int    `json:"line"`              // The line number this field appears on in the associated source file.
 	Signature  string `json:"body"`              // The full definition of the field including name, arguments and return values.
 	Comment    string `json:"comment,omitempty"` // Any inline comments associated with the field.
@@ -40,7 +41,8 @@ func (f *Field) Parse() *Field {
 	if f.astField.Names != nil {
 		f.Name = f.astField.Names[len(f.astField.Names)-1].Name
 	} else {
-		f.Name = fmt.Sprintf("<nested struct>: %v", f.astField.Type)
+		f.IsEmbedded = true
+		f.Name = fmt.Sprintf("%v", f.astField.Type)
 	}
 
 	pattern := regexp.MustCompile(`(?m)^[A-Z]{1}`)
@@ -64,7 +66,7 @@ func (f *Field) parseSignature() {
 	}
 
 	pattern := regexp.MustCompile(`\s+`)
-	f.Signature = pattern.ReplaceAllString(line, " ")
+	f.Signature = strings.TrimSpace(pattern.ReplaceAllString(line, " "))
 }
 
 // String implements the Stringer struct and returns the current package's name.

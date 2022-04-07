@@ -2,7 +2,6 @@ package gadget_test
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -73,12 +72,36 @@ this is another line`
 
 func TestWalker_Visit(t *testing.T) {
 	tokenSet := token.NewFileSet()
-	astFile, _ := parser.ParseFile(tokenSet, "noop.go", "", 0)
+	astFile, _ := parser.ParseFile(tokenSet, "cmd/main.go", nil, 0)
+
+	var imports []string
 
 	(&TestWalker{astFile}).walk(func(node ast.Node) bool {
-		fmt.Println(node)
+		switch n := node.(type) {
+		case *ast.File:
+			for _, i := range n.Imports {
+				imports = append(imports, strings.ReplaceAll(i.Path.Value, "\"", ""))
+			}
+		}
+
 		return true
 	})
+
+	assert.Contains(t, imports, "fmt", "Expected `cmd/main.go` to contain the \"fmt\" import.")
+
+	var count int
+	(&TestWalker{astFile}).walk(func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.File:
+			for range n.Imports {
+				count++
+			}
+		}
+
+		return false
+	})
+
+	assert.Greater(t, count, 0, "Expected `cmd/main.go` to contain imports, but got nothing instead.")
 }
 
 type TestWalker struct {

@@ -6,13 +6,13 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
-	"log"
 	"regexp"
 	"strings"
 )
 
 // Function represents a golang function or method along with meaningful fields.
 type Function struct {
+	// Comment string `json:"comment,omitempty"`  // Any inline comments associated with the function.
 	Name        string `json:"name"`               // The name of the function.
 	IsTest      bool   `json:"is_test"`            // Determines whether this is a test.
 	IsBenchmark bool   `json:"is_benchmark"`       // Determines whether this is a benchmark.
@@ -20,7 +20,6 @@ type Function struct {
 	IsExported  bool   `json:"is_exported"`        // Determines whether this function is exported.
 	IsMethod    bool   `json:"is_method"`          // Determines whether this a method. This will be true if this function has a receiver.
 	Receiver    string `json:"reciever,omitempty"` // If this method has a receiver, this field will refer to the name of the associated struct.
-	Comment     string `json:"comment,omitempty"`  // Any inline comments associated with the function.
 	Doc         string `json:"doc,omitempty"`      // The comment block directly above this funciton's definition.
 	Output      string `json:"output,omitempty"`   // If IsExample is true, this field should contain the comment block defining expected output.
 	Body        string `json:"body"`               // The body of this function; everything contained within the opening and closing braces.
@@ -37,7 +36,7 @@ type Function struct {
 func NewFunction(fn *ast.FuncDecl, parent *File) *Function {
 	return (&Function{
 		Name:    fn.Name.Name,
-		Comment: fn.Doc.Text(),
+		Doc:     fn.Doc.Text(),
 		astFunc: fn,
 		parent:  parent,
 	}).Parse()
@@ -79,21 +78,18 @@ func (f *Function) parseReceiver() {
 		case *ast.StarExpr:
 			return receiver(t.X)
 		case *ast.IndexExpr:
-			return fmt.Sprintf(receiver(t.X))
+			return fmt.Sprint(receiver(t.X))
 		}
-		return ""
+		return "" // unreachable
 	}
 
 	if f.astFunc.Recv != nil && len(f.astFunc.Recv.List) > 0 {
 		f.IsMethod = true
 
 		for _, l := range f.astFunc.Recv.List {
-			star, ok := l.Type.(*ast.StarExpr)
-			if !ok {
-				continue
+			if star, ok := l.Type.(*ast.StarExpr); ok {
+				f.Receiver = receiver(star)
 			}
-
-			f.Receiver = receiver(star)
 		}
 	}
 }
@@ -136,19 +132,21 @@ func (f *Function) parseLines() {
 // represents the current function's body. We remove the opening and closing
 // braces as well as the first occurrent `\t` sequence on each line.
 func (f *Function) parseBody() {
-	var b bytes.Buffer
-	if err := format.Node(&b, f.parent.tokenSet, f.astFunc.Body); err != nil {
-		log.Println(err)
+	if f.astFunc.Body == nil || f.parent.tokenSet == nil || len(f.astFunc.Body.List) == 0 {
+		return
 	}
 
-	f.Body = AdjustSource(fmt.Sprintf("%s", b.Bytes()), true)
+	var b bytes.Buffer
+	if err := format.Node(&b, f.parent.tokenSet, f.astFunc.Body); err == nil {
+		f.Body = AdjustSource(b.String(), true)
+	}
 }
 
 // parseSignature attempts to determine the current function's type and assigns
 // it to the Signature field of struct Function.
 func (f *Function) parseSignature() {
 	line := strings.TrimSpace(string(GetLinesFromFile(f.parent.Path, f.LineStart, f.LineStart)))
-	f.Signature = line[:len(line)-1]
+	f.Signature = strings.TrimSpace(line[:len(line)-1])
 }
 
 // String implements the Stringer struct and returns the current package's name.

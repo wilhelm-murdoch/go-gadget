@@ -8,13 +8,12 @@ import (
 )
 
 const (
-	KIND_INTERFACE   = "interface"   // Used if the type is an interface with methods.
-	KIND_STRUCT      = "struct"      // Used if the type is a struct with fields.
-	KIND_ARRAY       = "array"       // Used for array types.
-	KIND_FUNC        = "function"    // Use function types.
-	KIND_CHAN        = "channel"     // Used for channel types.
-	KIND_MAP         = "map"         // Used for map types.
-	KIND_UNSUPPORTED = "unsupported" // Used if no matching kinds can be found.
+	KIND_INTERFACE = "interface" // Used if the type is an interface with methods.
+	KIND_STRUCT    = "struct"    // Used if the type is a struct with fields.
+	KIND_ARRAY     = "array"     // Used for array types.
+	KIND_FUNC      = "function"  // Use function types.
+	KIND_CHAN      = "channel"   // Used for channel types.
+	KIND_MAP       = "map"       // Used for map types.
 )
 
 // Type represents a golang type definition.
@@ -100,8 +99,6 @@ func (t *Type) parseFields() {
 		t.Kind = KIND_CHAN
 	case *ast.MapType:
 		t.Kind = KIND_MAP
-	default:
-		t.Kind = KIND_UNSUPPORTED
 	}
 }
 
