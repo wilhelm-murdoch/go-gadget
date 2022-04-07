@@ -22,6 +22,9 @@ jobs:
           - {goos: "darwin",  goarch: "amd64", runson: "macos-latest"}
           # - {goos: "darwin",  goarch: "arm64", runson: "macos-latest"}
     steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
@@ -33,7 +36,7 @@ jobs:
           goarch: ${{ matrix.goarch }}
           project_path: "./cmd/gadget"
           binary_name: "gadget"
-          ldflags: "-s -w -X main.Version=v1.0.0 -X main.Release=production -X main.Sha=$GIT_SHA"
+          ldflags: "-s -w -X main.Version=${{ github.ref_name }} -X main.Stage=production -X main.Commit=${{ github.sha	}} -X main.Date ${{ steps.date.outputs.date }}"
           build_flags: "-a -installsuffix cgo"
           extra_files: LICENSE.md README.md
-          asset_name: "gadget-{{ matrix.goos }}-${{ matrix.goarch }}"
+          asset_name: "gadget-${{ matrix.goos }}-${{ matrix.goarch }}"
