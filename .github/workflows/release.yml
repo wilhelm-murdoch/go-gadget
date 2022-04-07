@@ -35,5 +35,5 @@ jobs:
           binary_name: "gadget"
           ldflags: "-s -w -X main.Version=v1.0.0 -X main.Release=production -X main.Sha=$GIT_SHA"
           build_flags: "-a -installsuffix cgo"
-          extra_files: LICENSE.md Readme.md
+          extra_files: LICENSE.md README.md
           asset_name: "gadget-{{ matrix.goos }}-${{ matrix.goarch }}"
