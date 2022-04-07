@@ -25,10 +25,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - run: "go test -v ./..."
-      - run: "go vet ./..."
       - uses: wangyoucao577/go-release-action@v1.25
         with:
+          goversion: "1.18"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
