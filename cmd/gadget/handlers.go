@@ -57,6 +57,13 @@ func actionRootHandler(c *cli.Context) error {
 	// template support using go's `html/template` package in addition to sprig's
 	// set of template functions using `sprig.FuncMap()`.
 	switch c.String("format") {
+	default:
+		fallthrough
+	case "json":
+		encoder := json.NewEncoder(os.Stdout)
+		if err := encoder.Encode(packages.Items()); err != nil {
+			return err
+		}
 	case "debug":
 		spew.Dump(packages)
 	case "template":
@@ -71,13 +78,6 @@ func actionRootHandler(c *cli.Context) error {
 		}
 
 		fmt.Println(html.UnescapeString(buffer.String()))
-	default:
-		fallthrough
-	case "json":
-		encoder := json.NewEncoder(os.Stdout)
-		if err := encoder.Encode(packages.Items()); err != nil {
-			return err
-		}
 	}
 
 	return nil
