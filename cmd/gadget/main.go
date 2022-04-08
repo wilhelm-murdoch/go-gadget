@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const (
+var (
 	// Version describes the version of the current build.
 	Version = "dev"
 

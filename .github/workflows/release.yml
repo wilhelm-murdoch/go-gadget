@@ -6,21 +6,24 @@ on:
 
 jobs:
   releases-matrix:
-    name: Release Go Binary
+    name: Release Go Binaries
     env:
       CGO_ENABLED: 0
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          # - {goos: "linux",   goarch: "386",   runson: "ubuntu-latest"}
-          # - {goos: "linux",   goarch: "amd64", runson: "ubuntu-latest"}
-          # - {goos: "linux",   goarch: "arm",   runson: "ubuntu-latest"}
-          # - {goos: "linux",   goarch: "arm64", runson: "ubuntu-latest"}
-          # - {goos: "windows", goarch: "386",   runson: "ubuntu-latest"}
-          # - {goos: "windows", goarch: "amd64", runson: "ubuntu-latest"}
+          - {goos: "linux",   goarch: "386",   runson: "ubuntu-latest"}
+          - {goos: "linux",   goarch: "amd64", runson: "ubuntu-latest"}
+          - {goos: "linux",   goarch: "arm",   runson: "ubuntu-latest"}
+          - {goos: "linux",   goarch: "arm64", runson: "ubuntu-latest"}
+          - {goos: "windows", goarch: "386",   runson: "ubuntu-latest"}
+          - {goos: "windows", goarch: "arm",   runson: "ubuntu-latest"}
+          - {goos: "windows", goarch: "amd64", runson: "ubuntu-latest"}
+          - {goos: "darwin",  goarch: "386",   runson: "macos-latest"}
+          - {goos: "darwin",  goarch: "arm",   runson: "macos-latest"}
           - {goos: "darwin",  goarch: "amd64", runson: "macos-latest"}
-          # - {goos: "darwin",  goarch: "arm64", runson: "macos-latest"}
+          - {goos: "darwin",  goarch: "arm64", runson: "macos-latest"}
     steps:
       - name: Get current date
         id: date

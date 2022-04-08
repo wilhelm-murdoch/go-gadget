@@ -143,3 +143,9 @@ func (f *File) walk(fn func(ast.Node) bool) {
 func (f *File) String() string {
 	return f.Path
 }
+
+// GetAstAttributes returns the values associated with the astFile and tokenSet
+// private fields. This is typically used for debug mode.
+func (f *File) GetAstAttributes() (*ast.File, *token.FileSet) {
+	return f.astFile, f.tokenSet
+}

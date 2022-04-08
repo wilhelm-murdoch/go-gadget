@@ -1,7 +1,11 @@
 BIN=go
+BUILD_DATE=$(shell date +'%d-%m-%Y')
+BUILD_REF=v0.0.0
+BUILD_STAGE=development
+BUILD_COMMIT=$(shell git rev-parse HEAD)
 
 build:
-	${BIN} build -v ./cmd/gadget
+	CGO_ENABLED=0 ${BIN} build -a -installsuffix cgo -ldflags="-s -w -X main.Date=${BUILD_DATE} -X main.Version=${BUILD_REF} -X main.Stage=${BUILD_STAGE} -X main.Commit=${BUILD_COMMIT}" ./cmd/gadget
 
 test:
 	${BIN} test -race -v .

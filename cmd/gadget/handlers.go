@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go/ast"
 	"html"
 	"html/template"
 	"os"
 	"strings"
 
 	"github.com/Masterminds/sprig"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/urfave/cli/v2"
 	"github.com/wilhelm-murdoch/go-collection"
 	"github.com/wilhelm-murdoch/go-gadget"
@@ -65,7 +65,14 @@ func actionRootHandler(c *cli.Context) error {
 			return err
 		}
 	case "debug":
-		spew.Dump(packages)
+		packages.Each(func(i int, p *gadget.Package) bool {
+			p.Files.Each(func(i int, f *gadget.File) bool {
+				astFile, tokenSet := f.GetAstAttributes()
+				ast.Print(tokenSet, astFile)
+				return false
+			})
+			return false
+		})
 	case "template":
 		tpl, err := template.New(c.String("template")).Funcs(sprig.FuncMap()).ParseFiles(c.String("template"))
 		if err != nil {
