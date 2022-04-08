@@ -32,3 +32,12 @@ func TestNewFile(t *testing.T) {
 	file, _ = gadget.NewFile("gadget_examples_test.go")
 	assert.True(t, file.HasExamples, "Expected to return `true` for containing example functions.")
 }
+
+func TestFileGetAstAttributes(t *testing.T) {
+	file, _ := gadget.NewFile("file.go")
+	assert.Equal(t, file.String(), "file.go", "Expected to return `file.go`, but got %s instead.", file)
+
+	astFile, tokenSet := file.GetAstAttributes()
+	name := tokenSet.File(astFile.Pos()).Name()
+	assert.Equal(t, name, "file.go", "Expected to return `file.go`, but got `%s` instead.", name)
+}
