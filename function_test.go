@@ -1,6 +1,7 @@
 package gadget_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,6 +35,7 @@ func TestFunctionFields(t *testing.T) {
 	f := file.Functions.Find(func(i int, item *gadget.Function) bool {
 		return item.Name == find
 	})
+	fmt.Println(f.Receiver)
 	assert.NotNil(t, f, "Expected a function to reference, but got nothing instead.")
 	assert.Equal(t, f.Name, find, "Expected function name %s, but got %s instead.", find, f.Name)
 	assert.False(t, f.IsTest, "Expected a non-test function.")

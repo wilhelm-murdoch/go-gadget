@@ -19,12 +19,12 @@ func ExampleNewFile_functions() {
 	// Output:
 	// NewFunction defined between lines 36 and 43
 	// Parse defined between lines 47 and 68
-	// parseReceiver defined between lines 71 and 95
-	// parseOutput defined between lines 101 and 121
-	// parseLines defined between lines 125 and 129
-	// parseBody defined between lines 134 and 143
-	// parseSignature defined between lines 147 and 150
-	// String defined between lines 153 and 155
+	// parseReceiver defined between lines 71 and 88
+	// parseOutput defined between lines 94 and 114
+	// parseLines defined between lines 118 and 122
+	// parseBody defined between lines 127 and 136
+	// parseSignature defined between lines 140 and 143
+	// String defined between lines 146 and 148
 }
 
 func ExampleNewFile_structs() {

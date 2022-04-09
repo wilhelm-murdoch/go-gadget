@@ -37,3 +37,4 @@ cover.html
 *.bak
 cmd/gadget/gadget
 *.json
+gadget

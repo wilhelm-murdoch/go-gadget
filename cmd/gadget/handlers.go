@@ -53,7 +53,7 @@ func actionRootHandler(c *cli.Context) error {
 		packages.Push(p)
 	}
 
-	// This cli supports three output modes: debug ( using spew ), JSON and
+	// This cli supports three output modes: debug ( using ast.Print ), JSON and
 	// template support using go's `html/template` package in addition to sprig's
 	// set of template functions using `sprig.FuncMap()`.
 	switch c.String("format") {

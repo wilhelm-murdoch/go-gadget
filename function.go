@@ -19,7 +19,7 @@ type Function struct {
 	IsExample   bool   `json:"is_example"`         // Determines whether this is an example.
 	IsExported  bool   `json:"is_exported"`        // Determines whether this function is exported.
 	IsMethod    bool   `json:"is_method"`          // Determines whether this a method. This will be true if this function has a receiver.
-	Receiver    string `json:"reciever,omitempty"` // If this method has a receiver, this field will refer to the name of the associated struct.
+	Receiver    string `json:"receiver,omitempty"` // If this method has a receiver, this field will refer to the name of the associated struct.
 	Doc         string `json:"doc,omitempty"`      // The comment block directly above this funciton's definition.
 	Output      string `json:"output,omitempty"`   // If IsExample is true, this field should contain the comment block defining expected output.
 	Body        string `json:"body"`               // The body of this function; everything contained within the opening and closing braces.
@@ -69,26 +69,19 @@ func (f *Function) Parse() *Function {
 
 // parseReceiver
 func (f *Function) parseReceiver() {
-	var receiver func(ast.Expr) string
-
-	receiver = func(recv ast.Expr) string {
-		switch t := recv.(type) {
-		case *ast.Ident:
-			return t.Name
-		case *ast.StarExpr:
-			return receiver(t.X)
-		case *ast.IndexExpr:
-			return fmt.Sprint(receiver(t.X))
-		}
-		return "" // unreachable
-	}
-
 	if f.astFunc.Recv != nil && len(f.astFunc.Recv.List) > 0 {
 		f.IsMethod = true
 
-		for _, l := range f.astFunc.Recv.List {
-			if star, ok := l.Type.(*ast.StarExpr); ok {
-				f.Receiver = receiver(star)
+		for _, recv := range f.astFunc.Recv.List {
+			switch xv := recv.Type.(type) {
+			case *ast.StarExpr:
+				if si, ok := xv.X.(*ast.Ident); ok {
+					f.Receiver = si.Name
+				}
+			case *ast.Ident:
+				f.Receiver = xv.Name
+			case *ast.IndexExpr:
+				f.Receiver = xv.X.(*ast.Ident).Name
 			}
 		}
 	}
