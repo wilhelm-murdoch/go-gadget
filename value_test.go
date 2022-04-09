@@ -12,12 +12,13 @@ func TestNewValue(t *testing.T) {
 	var file *gadget.File
 	var vars []string
 
-	file, err = gadget.NewFile("value_test.go")
+	find := "sink/sink.go"
+	file, err = gadget.NewFile(find)
 	assert.Nil(t, err, "Expected to open existing file, but got: %s", err)
 
 	file.Values.Each(func(i int, v *gadget.Value) bool {
 		vars = append(vars, v.String())
 		return false
 	})
-	assert.Equal(t, len(vars), 3, "Expected 3 vars declared in `value_test.go`, but got %d instead.", len(vars))
+	assert.Equal(t, len(vars), 7, "Expected 7 vars declared in `%s`, but got %d instead.", find, len(vars))
 }

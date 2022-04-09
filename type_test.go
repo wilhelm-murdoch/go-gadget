@@ -7,26 +7,24 @@ import (
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
-type TestArray []string
-type TestFunc func(string) error
-type TestChan chan int
-type TestMap map[string]string
-type TestInterface interface {
-	Thing()
-	Boop()
-	Stuff()
-	Flarp()
-}
-
 func TestNewType(t *testing.T) {
 	var err error
 	var file *gadget.File
 
-	file, err = gadget.NewFile("type_test.go")
+	file, err = gadget.NewFile("sink/sink.go")
 	assert.Nil(t, err, "Expected to open existing file, but got: %s", err)
 
 	var expectedTypes, foundTypes []string
-	expectedTypes = []string{"TestArray", "TestFunc", "TestChan", "TestMap", "TestInterface"}
+	expectedTypes = []string{
+		"NormalFuncType",
+		"NormalChannelType",
+		"NormalRandomType",
+		"GenericRandomType",
+		"InterfaceTest",
+		"EmbeddedStructTest",
+		"NormalStructTest",
+		"GenericStructTest",
+	}
 	file.Types.Each(func(i int, t *gadget.Type) bool {
 		foundTypes = append(foundTypes, t.String())
 		return false

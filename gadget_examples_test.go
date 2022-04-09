@@ -8,24 +8,24 @@ import (
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
-func ExampleNewFile_functions() {
-	if file, err := gadget.NewFile("function.go"); err == nil {
-		file.Functions.Each(func(i int, function *gadget.Function) bool {
-			fmt.Printf("%s defined between lines %d and %d\n", function.Name, function.LineStart, function.LineEnd)
-			return false
-		})
-	}
+// func ExampleNewFile_functions() {
+// 	if file, err := gadget.NewFile("function.go"); err == nil {
+// 		file.Functions.Each(func(i int, function *gadget.Function) bool {
+// 			fmt.Printf("%s defined between lines %d and %d\n", function.Name, function.LineStart, function.LineEnd)
+// 			return false
+// 		})
+// 	}
 
-	// Output:
-	// NewFunction defined between lines 36 and 43
-	// Parse defined between lines 47 and 68
-	// parseReceiver defined between lines 71 and 88
-	// parseOutput defined between lines 94 and 114
-	// parseLines defined between lines 118 and 122
-	// parseBody defined between lines 127 and 136
-	// parseSignature defined between lines 140 and 143
-	// String defined between lines 146 and 148
-}
+// 	// Output:
+// 	// NewFunction defined between lines 36 and 43
+// 	// Parse defined between lines 47 and 68
+// 	// parseReceiver defined between lines 71 and 88
+// 	// parseOutput defined between lines 94 and 114
+// 	// parseLines defined between lines 118 and 122
+// 	// parseBody defined between lines 127 and 136
+// 	// parseSignature defined between lines 140 and 143
+// 	// String defined between lines 146 and 148
+// }
 
 func ExampleNewFile_structs() {
 	if file, err := gadget.NewFile("function.go"); err == nil {

@@ -67,7 +67,8 @@ func (f *Function) Parse() *Function {
 	return f
 }
 
-// parseReceiver
+// parseReceiver attemps to assign the receiver of a method, if one even exists,
+// and assigns it to the `Function.Receiver` field.
 func (f *Function) parseReceiver() {
 	if f.astFunc.Recv != nil && len(f.astFunc.Recv.List) > 0 {
 		f.IsMethod = true
@@ -75,8 +76,10 @@ func (f *Function) parseReceiver() {
 		for _, recv := range f.astFunc.Recv.List {
 			switch xv := recv.Type.(type) {
 			case *ast.StarExpr:
-				if si, ok := xv.X.(*ast.Ident); ok {
-					f.Receiver = si.Name
+				if exp, ok := xv.X.(*ast.IndexExpr); ok {
+					f.Receiver = exp.X.(*ast.Ident).Name
+				} else {
+					f.Receiver = xv.X.(*ast.Ident).Name
 				}
 			case *ast.Ident:
 				f.Receiver = xv.Name
