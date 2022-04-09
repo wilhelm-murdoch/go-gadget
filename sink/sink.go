@@ -1,3 +1,5 @@
+// Package sink covers most, if not all, patterns to adequately-test gadget's
+// capabilities.
 package sink
 
 import "fmt"

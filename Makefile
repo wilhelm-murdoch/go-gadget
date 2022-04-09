@@ -4,6 +4,9 @@ BUILD_REF=v0.0.0
 BUILD_STAGE=development
 BUILD_COMMIT=$(shell git rev-parse HEAD)
 
+clean:
+	rm gadget *.out *.test 
+
 build:
 	CGO_ENABLED=0 ${BIN} build -a -installsuffix cgo -ldflags="-s -w -X main.Date=${BUILD_DATE} -X main.Version=${BUILD_REF} -X main.Stage=${BUILD_STAGE} -X main.Commit=${BUILD_COMMIT}" ./cmd/gadget
 
