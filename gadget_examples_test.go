@@ -55,7 +55,7 @@ func ExampleNewFile_structs() {
 	// - Last on line 65
 	// - Age on line 66
 	// - private on line 67
-	// - &{1981 EmbeddedStructTest} on line 68
+	// - EmbeddedStructTest on line 68
 	// GenericStructTest is a struct with 4 fields:
 	// - First on line 104
 	// - Last on line 105

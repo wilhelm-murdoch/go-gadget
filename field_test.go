@@ -57,7 +57,7 @@ func TestFields(t *testing.T) {
 	f2 := t4.Fields.CountBy(func(f *gadget.Field) bool {
 		return f.IsExported == false
 	})
-	assert.Equal(t, f2, 2, "Expected to return two unexported fields, but got %d instead.", f2)
+	assert.Equal(t, f2, 1, "Expected to return one unexported field, but got %d instead.", f2)
 
 	f3 := t4.Fields.Find(func(i int, item *gadget.Field) bool {
 		return item.Name == "private"

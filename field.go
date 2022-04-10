@@ -42,7 +42,7 @@ func (f *Field) Parse() *Field {
 		f.Name = f.astField.Names[len(f.astField.Names)-1].Name
 	} else {
 		f.IsEmbedded = true
-		f.Name = fmt.Sprintf("%v", f.astField.Type)
+		f.Name = fmt.Sprintf("%v", f.astField.Type.(*ast.StarExpr).X.(*ast.Ident).Name)
 	}
 
 	pattern := regexp.MustCompile(`(?m)^[A-Z]{1}`)
