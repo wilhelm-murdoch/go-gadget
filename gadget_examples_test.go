@@ -8,70 +8,72 @@ import (
 	"github.com/wilhelm-murdoch/go-gadget"
 )
 
-// func ExampleNewFile_functions() {
-// 	if file, err := gadget.NewFile("function.go"); err == nil {
-// 		file.Functions.Each(func(i int, function *gadget.Function) bool {
-// 			fmt.Printf("%s defined between lines %d and %d\n", function.Name, function.LineStart, function.LineEnd)
-// 			return false
-// 		})
-// 	}
-
-// 	// Output:
-// 	// NewFunction defined between lines 36 and 43
-// 	// Parse defined between lines 47 and 68
-// 	// parseReceiver defined between lines 71 and 88
-// 	// parseOutput defined between lines 94 and 114
-// 	// parseLines defined between lines 118 and 122
-// 	// parseBody defined between lines 127 and 136
-// 	// parseSignature defined between lines 140 and 143
-// 	// String defined between lines 146 and 148
-// }
-
-func ExampleNewFile_structs() {
-	if file, err := gadget.NewFile("function.go"); err == nil {
-		file.Types.Each(func(i int, t *gadget.Type) bool {
-			fmt.Printf("%s is a %s with %d fields:\n", t.Name, t.Kind, t.Fields.Length())
-			t.Fields.Each(func(i int, f *gadget.Field) bool {
-				fmt.Printf("- %s on line %d\n", f.Name, f.Line)
-				return false
-			})
+func ExampleNewFile_functions() {
+	if file, err := gadget.NewFile("sink/sink.go"); err == nil {
+		file.Functions.Each(func(i int, function *gadget.Function) bool {
+			fmt.Printf("%s defined between lines %d and %d\n", function.Name, function.LineStart, function.LineEnd)
 			return false
 		})
 	}
 
 	// Output:
-	// Function is a struct with 16 fields:
-	// - Name on line 16
-	// - IsTest on line 17
-	// - IsBenchmark on line 18
-	// - IsExample on line 19
-	// - IsExported on line 20
-	// - IsMethod on line 21
-	// - Receiver on line 22
-	// - Doc on line 23
-	// - Output on line 24
-	// - Body on line 25
-	// - Signature on line 26
-	// - LineStart on line 27
-	// - LineEnd on line 28
-	// - LineCount on line 29
-	// - astFunc on line 30
-	// - parent on line 31
+	// PrintVars defined between lines 30 and 34
+	// AssignCollection defined between lines 37 and 43
+	// PrintConst defined between lines 46 and 50
+	// NewNormalStructTest defined between lines 72 and 79
+	// GetPrivate defined between lines 82 and 84
+	// GetOccupation defined between lines 87 and 89
+	// GetFullName defined between lines 92 and 94
+	// notExported defined between lines 98 and 100
+	// NewGenericStructTest defined between lines 111 and 113
+	// GetPrivate defined between lines 116 and 118
+	// GetFullName defined between lines 121 and 123
+	// IsBlank defined between lines 126 and 126
+}
+
+func ExampleNewFile_structs() {
+	if file, err := gadget.NewFile("sink/sink.go"); err == nil {
+		file.Types.Each(func(i int, t *gadget.Type) bool {
+			if t.Fields.Length() > 0 {
+				fmt.Printf("%s is a %s with %d fields:\n", t.Name, t.Kind, t.Fields.Length())
+				t.Fields.Each(func(i int, f *gadget.Field) bool {
+					fmt.Printf("- %s on line %d\n", f.Name, f.Line)
+					return false
+				})
+			}
+			return false
+		})
+	}
+
+	// Output:
+	// InterfaceTest is a interface with 1 fields:
+	// - ImplementMe on line 54
+	// EmbeddedStructTest is a struct with 1 fields:
+	// - Occupation on line 59
+	// NormalStructTest is a struct with 5 fields:
+	// - First on line 64
+	// - Last on line 65
+	// - Age on line 66
+	// - private on line 67
+	// - &{1981 EmbeddedStructTest} on line 68
+	// GenericStructTest is a struct with 4 fields:
+	// - First on line 104
+	// - Last on line 105
+	// - Age on line 106
+	// - private on line 107
 }
 
 func ExampleNewFile_json() {
 	var buffer strings.Builder
-	if file, err := gadget.NewFile("value.go"); err == nil {
-		if t, ok := file.Types.AtFirst(); ok {
-			encoder := json.NewEncoder(&buffer)
-			if err := encoder.Encode(t.Fields.Items()); err != nil {
-				fmt.Println(err)
-			}
+	if file, err := gadget.NewFile("sink/sink.go"); err == nil {
+		encoder := json.NewEncoder(&buffer)
+		if err := encoder.Encode(file.Values.Items()); err != nil {
+			fmt.Println(err)
 		}
 	}
 
 	fmt.Println(buffer.String())
 
 	// Output:
-	// [{"name":"Kind","is_exported":true,"is_embedded":false,"line":10,"body":"Kind string `json:\"kind\"`","comment":"Describes the current value's type, eg; CONST or VAR."},{"name":"Name","is_exported":true,"is_embedded":false,"line":11,"body":"Name string `json:\"name\"`","comment":"The name of the value."},{"name":"Line","is_exported":true,"is_embedded":false,"line":12,"body":"Line int `json:\"line\"`","comment":"The line number within the associated source file in which this value was originally defined."},{"name":"Body","is_exported":true,"is_embedded":false,"line":13,"body":"Body string `json:\"body\"`","comment":"The full content of the associated statement."},{"name":"astIdent","is_exported":false,"is_embedded":false,"line":14,"body":"astIdent *ast.Ident"},{"name":"parent","is_exported":false,"is_embedded":false,"line":15,"body":"parent *File"}]
+	// [{"kind":"const","name":"ONE","line":9,"body":"ONE   = 1 // represents the number 1"},{"kind":"const","name":"TWO","line":10,"body":"TWO   = 2 // represents the number 2"},{"kind":"const","name":"THREE","line":11,"body":"THREE = 3 // represents the number 3"},{"kind":"var","name":"one","line":16,"body":"one   = \"one\"   // represents the english spelling of 1"},{"kind":"var","name":"two","line":17,"body":"two   = \"two\"   // represents the english spelling of 2"},{"kind":"var","name":"three","line":18,"body":"three = \"three\" // represents the english spelling of 3"},{"kind":"var","name":"collection","line":27,"body":"var collection map[string]map[string]string // this should be picked up as an inline comment."}]
 }

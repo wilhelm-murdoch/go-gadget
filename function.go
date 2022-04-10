@@ -8,25 +8,28 @@ import (
 	"go/token"
 	"regexp"
 	"strings"
+
+	"github.com/wilhelm-murdoch/go-collection"
 )
 
 // Function represents a golang function or method along with meaningful fields.
 type Function struct {
 	// Comment string `json:"comment,omitempty"`  // Any inline comments associated with the function.
-	Name        string `json:"name"`               // The name of the function.
-	IsTest      bool   `json:"is_test"`            // Determines whether this is a test.
-	IsBenchmark bool   `json:"is_benchmark"`       // Determines whether this is a benchmark.
-	IsExample   bool   `json:"is_example"`         // Determines whether this is an example.
-	IsExported  bool   `json:"is_exported"`        // Determines whether this function is exported.
-	IsMethod    bool   `json:"is_method"`          // Determines whether this a method. This will be true if this function has a receiver.
-	Receiver    string `json:"receiver,omitempty"` // If this method has a receiver, this field will refer to the name of the associated struct.
-	Doc         string `json:"doc,omitempty"`      // The comment block directly above this funciton's definition.
-	Output      string `json:"output,omitempty"`   // If IsExample is true, this field should contain the comment block defining expected output.
-	Body        string `json:"body"`               // The body of this function; everything contained within the opening and closing braces.
-	Signature   string `json:"signature"`          // The full definition of the function including receiver, name, arguments and return values.
-	LineStart   int    `json:"line_start"`         // The line number in the associated source file where this function is initially defined.
-	LineEnd     int    `json:"line_end"`           // The line number in the associated source file where the definition block ends.
-	LineCount   int    `json:"line_count"`         // The total number of lines, including body, the interface occupies.
+	Name        string                            `json:"name"`               // The name of the function.
+	IsTest      bool                              `json:"is_test"`            // Determines whether this is a test.
+	IsBenchmark bool                              `json:"is_benchmark"`       // Determines whether this is a benchmark.
+	IsExample   bool                              `json:"is_example"`         // Determines whether this is an example.
+	IsExported  bool                              `json:"is_exported"`        // Determines whether this function is exported.
+	IsMethod    bool                              `json:"is_method"`          // Determines whether this a method. This will be true if this function has a receiver.
+	Receiver    string                            `json:"receiver,omitempty"` // If this method has a receiver, this field will refer to the name of the associated struct.
+	Doc         string                            `json:"doc,omitempty"`      // The comment block directly above this funciton's definition.
+	Output      string                            `json:"output,omitempty"`   // If IsExample is true, this field should contain the comment block defining expected output.
+	Body        string                            `json:"body"`               // The body of this function; everything contained within the opening and closing braces.
+	Signature   string                            `json:"signature"`          // The full definition of the function including receiver, name, arguments and return values.
+	LineStart   int                               `json:"line_start"`         // The line number in the associated source file where this function is initially defined.
+	LineEnd     int                               `json:"line_end"`           // The line number in the associated source file where the definition block ends.
+	LineCount   int                               `json:"line_count"`         // The total number of lines, including body, the interface occupies.
+	Examples    *collection.Collection[*Function] `json:"examples"`           // A list of example functions associated with the current function.
 	astFunc     *ast.FuncDecl
 	parent      *File
 }
@@ -35,10 +38,11 @@ type Function struct {
 // associated fields with meaningful values.
 func NewFunction(fn *ast.FuncDecl, parent *File) *Function {
 	return (&Function{
-		Name:    fn.Name.Name,
-		Doc:     fn.Doc.Text(),
-		astFunc: fn,
-		parent:  parent,
+		Name:     fn.Name.Name,
+		Doc:      fn.Doc.Text(),
+		Examples: collection.New[*Function](),
+		astFunc:  fn,
+		parent:   parent,
 	}).Parse()
 }
 
@@ -126,7 +130,9 @@ func (f *Function) parseLines() {
 
 // parseBody attempts to make a few adjustments to the *ast.BlockStmt which
 // represents the current function's body. We remove the opening and closing
-// braces as well as the first occurrent `\t` sequence on each line.
+// braces as well as the first occurrent `\t` sequence on each line. Some people
+// will ask, "wHy dOn't yOu uSe tHe aSt pAcKaGe fOr tHiS" to which I answer,
+// "Because, I'm lazy. We have the file, we know which lines contain the body."
 func (f *Function) parseBody() {
 	if f.astFunc.Body == nil || f.parent.tokenSet == nil || len(f.astFunc.Body.List) == 0 {
 		return

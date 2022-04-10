@@ -32,8 +32,8 @@ coverage:
 	${BIN} test -v -coverprofile cover.out .
 
 watch-template:
-	${BIN} run ./cmd/gadget -format template; echo "---boundary---"
-	fswatch ./cmd/gadget/main.go README.tpl | while read file; do ${BIN} run ./cmd/gadget --format template; echo "---boundary---"; done
+	${BIN} run ./cmd/gadget --format template > README.md
+	fswatch ./cmd/gadget/main.go README.tpl | while read file; do ${BIN} run ./cmd/gadget --format template > README.md; done
 
 watch-json:
 	${BIN} run ./cmd/gadget | jq -r

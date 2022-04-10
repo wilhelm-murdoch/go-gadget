@@ -4,7 +4,7 @@
     "files": [
       {
         "name": "benchmarks_test.go",
-        "path": "benchmarks_test.go",
+        "path": "sink/benchmarks_test.go",
         "package": "sink_test",
         "is_main": false,
         "is_test": true,
@@ -28,14 +28,15 @@
             "signature": "func BenchmarkKitchenSink(b *testing.B)",
             "line_start": 8,
             "line_end": 12,
-            "line_count": 4
+            "line_count": 4,
+            "examples": null
           }
         ],
         "types": null
       },
       {
         "name": "examples_test.go",
-        "path": "examples_test.go",
+        "path": "sink/examples_test.go",
         "package": "sink_test",
         "is_main": false,
         "is_test": true,
@@ -60,14 +61,15 @@
             "signature": "func ExampleNewNormalStructTest()",
             "line_start": 9,
             "line_end": 16,
-            "line_count": 7
+            "line_count": 7,
+            "examples": null
           }
         ],
         "types": null
       },
       {
         "name": "sink_test.go",
-        "path": "sink_test.go",
+        "path": "sink/sink_test.go",
         "package": "sink_test",
         "is_main": false,
         "is_test": true,
@@ -91,7 +93,8 @@
             "signature": "func TestKitchenSink(t *testing.T)",
             "line_start": 9,
             "line_end": 11,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           }
         ],
         "types": null
@@ -103,7 +106,7 @@
     "files": [
       {
         "name": "sink.go",
-        "path": "sink.go",
+        "path": "sink/sink.go",
         "package": "sink",
         "is_main": false,
         "is_test": false,
@@ -154,7 +157,7 @@
             "kind": "var",
             "name": "collection",
             "line": 27,
-            "body": "var collection map[string]map[string]string // this should be picked up as an inline comment"
+            "body": "var collection map[string]map[string]string // this should be picked up as an inline comment."
           }
         ],
         "functions": [
@@ -165,12 +168,13 @@
             "is_example": false,
             "is_exported": true,
             "is_method": false,
-            "doc": "PrintVars prints out a value on each line:\n",
+            "doc": "PrintVars prints out a value on each line.\n",
             "body": "fmt.Println(one)\nfmt.Println(two)\nfmt.Println(three)",
             "signature": "func PrintVars()",
             "line_start": 30,
             "line_end": 34,
-            "line_count": 4
+            "line_count": 4,
+            "examples": null
           },
           {
             "name": "AssignCollection",
@@ -179,12 +183,13 @@
             "is_example": false,
             "is_exported": true,
             "is_method": false,
-            "doc": "AssignCollection assigns values to var collection:\n",
+            "doc": "AssignCollection assigns values to var collection.\n",
             "body": "collection = make(map[string]map[string]string)\n\ncollection[\"one\"] = map[string]string{\"foo\": \"bar\"}\ncollection[\"two\"] = map[string]string{\"merp\": \"flakes\"}",
             "signature": "func AssignCollection()",
             "line_start": 37,
             "line_end": 43,
-            "line_count": 6
+            "line_count": 6,
+            "examples": null
           },
           {
             "name": "PrintConst",
@@ -193,12 +198,13 @@
             "is_example": false,
             "is_exported": true,
             "is_method": false,
-            "doc": "PrintConst prints out a value on each line:\n",
+            "doc": "PrintConst prints out a value on each line.\n",
             "body": "fmt.Println(ONE)\nfmt.Println(TWO)\nfmt.Println(THREE)",
             "signature": "func PrintConst()",
             "line_start": 46,
             "line_end": 50,
-            "line_count": 4
+            "line_count": 4,
+            "examples": null
           },
           {
             "name": "NewNormalStructTest",
@@ -207,12 +213,29 @@
             "is_example": false,
             "is_exported": true,
             "is_method": false,
-            "doc": "NewNormalStructTest returns a new instance of NormalStructTest:\n",
+            "doc": "NewNormalStructTest returns a new instance of NormalStructTest.\n",
             "body": "return &NormalStructTest{\n\tFirst:              first,\n\tLast:               last,\n\tAge:                age,\n\tEmbeddedStructTest: &EmbeddedStructTest{\"SWE\"},\n}",
             "signature": "func NewNormalStructTest(first, last string, age int) *NormalStructTest",
             "line_start": 72,
             "line_end": 79,
-            "line_count": 7
+            "line_count": 7,
+            "examples": [
+              {
+                "name": "ExampleNewNormalStructTest",
+                "is_test": false,
+                "is_benchmark": false,
+                "is_example": true,
+                "is_exported": true,
+                "is_method": false,
+                "output": "// Output:\n// Wilhelm Murdoch",
+                "body": "s := sink.NewNormalStructTest(\"Wilhelm\", \"Murdoch\", 40)\n\nfmt.Println(s.First, s.Last)",
+                "signature": "func ExampleNewNormalStructTest()",
+                "line_start": 9,
+                "line_end": 16,
+                "line_count": 7,
+                "examples": null
+              }
+            ]
           },
           {
             "name": "GetPrivate",
@@ -222,12 +245,13 @@
             "is_exported": true,
             "is_method": true,
             "receiver": "NormalStructTest",
-            "doc": "GetPrivate is an accessor method that returns a dark secret:\n",
+            "doc": "GetPrivate is an accessor method that returns a dark secret.\n",
             "body": "return nst.private",
             "signature": "func (nst *NormalStructTest) GetPrivate() string",
             "line_start": 82,
             "line_end": 84,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "GetOccupation",
@@ -237,12 +261,13 @@
             "is_exported": true,
             "is_method": true,
             "receiver": "NormalStructTest",
-            "doc": "GetOccupation is an accessor method that returns an occupation:\n",
+            "doc": "GetOccupation is an accessor method that returns an occupation.\n",
             "body": "return nst.Occupation",
             "signature": "func (nst *NormalStructTest) GetOccupation() string",
             "line_start": 87,
             "line_end": 89,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "GetFullName",
@@ -252,12 +277,13 @@
             "is_exported": true,
             "is_method": true,
             "receiver": "NormalStructTest",
-            "doc": "GetFullName is an function that attempts to return a full name:\n",
+            "doc": "GetFullName is an function that attempts to return a full name.\n",
             "body": "return fmt.Sprint(nst.First, nst.Last)",
             "signature": "func (nst NormalStructTest) GetFullName() string",
             "line_start": 92,
             "line_end": 94,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "notExported",
@@ -267,12 +293,13 @@
             "is_exported": false,
             "is_method": true,
             "receiver": "NormalStructTest",
-            "doc": "notExported is an example of a function that will not be exported:\n",
+            "doc": "notExported is an example of a function that will not be exported.\n",
             "body": "return \"I should not be exported!\"",
             "signature": "func (nst NormalStructTest) notExported() string",
             "line_start": 98,
             "line_end": 100,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "NewGenericStructTest",
@@ -281,12 +308,13 @@
             "is_example": false,
             "is_exported": true,
             "is_method": false,
-            "doc": "NewGenericStructTest returns a new instance of GenericStructTest:\n",
+            "doc": "NewGenericStructTest returns a new instance of GenericStructTest.\n",
             "body": "return &GenericStructTest[T]{first, last, age, \"hidden\"}",
             "signature": "func NewGenericStructTest[T any](first, last string, age int) *GenericStructTest[T]",
             "line_start": 111,
             "line_end": 113,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "GetPrivate",
@@ -296,12 +324,13 @@
             "is_exported": true,
             "is_method": true,
             "receiver": "GenericStructTest",
-            "doc": "GetPrivate is an accessor method that returns a dark secret:\n",
+            "doc": "GetPrivate is an accessor method that returns a dark secret.\n",
             "body": "return nst.private",
             "signature": "func (nst *GenericStructTest[T]) GetPrivate() string",
             "line_start": 116,
             "line_end": 118,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "GetFullName",
@@ -311,12 +340,13 @@
             "is_exported": true,
             "is_method": true,
             "receiver": "GenericStructTest",
-            "doc": "GetFullName is an function that attempts to return a full name:\n",
+            "doc": "GetFullName is an function that attempts to return a full name.\n",
             "body": "return fmt.Sprint(nst.First, nst.Last)",
             "signature": "func (nst GenericStructTest[T]) GetFullName() string",
             "line_start": 121,
             "line_end": 123,
-            "line_count": 2
+            "line_count": 2,
+            "examples": null
           },
           {
             "name": "IsBlank",
@@ -326,12 +356,13 @@
             "is_exported": true,
             "is_method": true,
             "receiver": "GenericStructTest",
-            "doc": "IsBlank is an function that does not have a body:\n",
+            "doc": "IsBlank is an function that does not have a body.\n",
             "body": "",
             "signature": "func (nst GenericStructTest[T]) IsBlank() {",
             "line_start": 126,
             "line_end": 126,
-            "line_count": 0
+            "line_count": 0,
+            "examples": null
           }
         ],
         "types": [
@@ -397,7 +428,7 @@
             "line_end": 60,
             "line_count": 3,
             "signature": "type EmbeddedStructTest struct",
-            "body": "Occupation string // a standard job title",
+            "body": "Occupation string // a standard job title.",
             "fields": [
               {
                 "name": "Occupation",
@@ -405,7 +436,7 @@
                 "is_embedded": false,
                 "line": 59,
                 "body": "Occupation string",
-                "comment": "a standard job title"
+                "comment": "a standard job title."
               }
             ]
           },
@@ -451,7 +482,7 @@
                 "comment": "a dark secret"
               },
               {
-                "name": "&{1976 EmbeddedStructTest}",
+                "name": "&{1981 EmbeddedStructTest}",
                 "is_exported": false,
                 "is_embedded": true,
                 "line": 68,
