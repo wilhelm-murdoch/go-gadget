@@ -22,4 +22,4 @@ Enjoy!
 ```go
 {{ .Body }}
 ```
-{{ end }}---{{ end }}{{ end }}{{ end }}
+{{ end }}{{ end }}{{ end }}{{ end }}

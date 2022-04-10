@@ -6,21 +6,23 @@
 [![Go report](https://goreportcard.com/badge/github.com/wilhelm-murdoch/go-gadget)](https://goreportcard.com/report/github.com/wilhelm-murdoch/go-gadget)
 [![Stability: Active](https://masterminds.github.io/stability/active.svg)](https://masterminds.github.io/stability/active.html)
 
-Gadget is a simple CLI that allows you to inspect your Go source code using a relatively flat and simple representation. It's effectively a simpler layer of abstraction built on top of the Go AST package. Point this at your Go source code and you'll get a nice JSON object representing the values, functions, methods and types in your project.
+`gadget` is a tool that allows you to quickly inspect your Go source code. It's effectively a small layer of abstraction built on top of the Go AST package.
 
 It _inspects_ your _go_ code, hence the name:
 ![Go-go Gadget!](gadget.png)
 ### Why?
-I was working on [another project](https://github.com/wilhelm-murdoch/go-collection) of mine and thought to myself, "It would be nice if I didn't have to constantly update this readme file every time I made a change." So, I started digging around Go's AST package and came up with Gadget.
+I was working on [another project](https://github.com/wilhelm-murdoch/go-collection) of mine and thought to myself, "It would be nice if I didn't have to constantly update this readme file every time I made a change." So, I started digging around Go's AST package and came up with `gadget`.
 ### But, pkg.go.dev already does this ...
-Yeah, I know. But, I didn't fully realise what I was writing until about 90% into the project. Maybe you don't want people to have to leave your repository to understand your API. Or, maybe you want to present this data in a different, more personalised, format.
+Yeah, I know. But, I didn't fully realise I writing a crappier version of pkg.go.dev until about 90% into the project.
 
-It was fun to write and I use the tool almost daily.
+* Maybe you don't want people to leave your repository to understand the basics of your package's API. 
+* Maybe you want to present this data in a different, more personalised, format.
+* Maybe you can use this to write a basic linter, or just learn more about Go AST.
 
-Maybe you'll find it useful too. :)
+It was fun to write and I use the tool almost daily. Perhaps you'll find it useful as well.
 ## Download & Install
 
-We publish binary releases for the most common operating systems and CPU architectures. These can be downloaded from the [releases page](https://github.com/wilhelm-murdoch/go-gadget/releases). Presentingly, Gadget has been tested on, and compiled for, the following:
+Binary releases are regularly published for the most common operating systems and CPU architectures. These can be downloaded from the [releases page](https://github.com/wilhelm-murdoch/go-gadget/releases). Presentingly, `gadget` has been tested on, and compiled for, the following:
 1. Windows on `386`, `arm`, `amd64`
 2. MacOS ( `debian` ) on `amd64`, `arm64`
 3. Linux on `386`, `arm`, `amd64`, `arm64`
@@ -28,7 +30,7 @@ We publish binary releases for the most common operating systems and CPU archite
 Download the appropriate archive and unpack the binary into your machine's local `$PATH`.
 
 ## Usage
-Once added to your machine's local `$PATH` you can invoke Gadget like so:
+Once added to your machine's local `$PATH` you can invoke `gadget` like so:
 ```
 $ gadget --help
 NAME:
@@ -57,7 +59,7 @@ COPYRIGHT:
    (c) 2022 Wilhelm Codes ( https://wilhelm.codes )
 ```
 ### JSON
-Invoking the command with no flags will result in Gadget searching for `*.go` files by recursively walking through the present working directory. Results will be displayed as a JSON object following this structure:
+Invoking the command with no flags will result in `gadget` searching for `*.go` files by recursively walking through the present working directory. Results will be displayed as a JSON object following this structure:
 
 - `packages`: a list of discovered packages.
   - `files`: any `*.go` file associated with the package.
@@ -69,7 +71,7 @@ Invoking the command with no flags will result in Gadget searching for `*.go` fi
 A full example of the JSON object can be found in [here](./sink/sink.json).
 
 ### Debug
-When invoking Gadget using the `--format debug` flag, you will get output representing all evaluated source code using `ast.Print(...)`. Use this to follow the structure of the AST.
+When invoking `gadget` using the `--format debug` flag, you will get output representing all evaluated source code using `ast.Print(...)`. Use this to follow the structure of the AST.
 ```bash
 $ gadget --source /path/to/my/project --format debug
 ... heaps of AST output ...
@@ -104,7 +106,7 @@ Use Go's template engine, along with [sprig](https://masterminds.github.io/sprig
 ```bash
 $ gadget --format template --template README.tpl > README.md
 ```
-Or, without the `--template ...` flag as it will use `README.tpl` as the default template:
+Or, without the `--template ...` flag as it will use `README.tpl` as the default template if it exists in the starting directory:
 ```
 $ gadget --format template > README.md
 ```
@@ -114,7 +116,7 @@ The best way to understand this is by viewing the following "kitchen sink" examp
 
 ## Build Locally
 
-Gadget makes use of Go's new generics support, so the minimum viable version of the language is `1.18.x`. Ensure your local development environment meets this single requirement before continuing. There are also several build flags used when compiling the binary. These populate the output of the `gadget --version` flag.
+`gadget` makes use of Go's new generics support, so the minimum viable version of the language is `1.18.x`. Ensure your local development environment meets this single requirement before continuing. There are also several build flags used when compiling the binary. These populate the output of the `gadget --version` flag.
 ```bash
 $ git clone git@github.com:wilhelm-murdoch/go-gadget.git
 $ cd gadget
@@ -123,7 +125,7 @@ $ ./gadget --version
 Version: v99.99.99, Stage: local, Commit: 9932cf9fdc90c0d8223ef85a0fc1ddfa99c28f95, Date: 10-04-2022
 ```
 ### Testing
-All major functionality of Gadget has been covered by testing. You can run the tests, benchmarks and lints using the following set of `Makefile` targets:
+All major functionality of `gadget` has been covered by testing. You can run the tests, benchmarks and lints using the following set of `Makefile` targets:
 - `make test`: run the local testing suite.
 - `make lint`: run `staticcheck` on the local source files.
 - `make bench`: run a series of benchmarks and output the results as `cpu.out`, `mem.out` and `trace.out`
@@ -134,9 +136,37 @@ All major functionality of Gadget has been covered by testing. You can run the t
 
 ## API
 
-While gadget is meant to be used as a CLI, there's no reason you can't make use of it as a library to intgrate into your own tools. If you were wondering, yes, this readme file was generated by Gadget itself. Take a look at [README.tpl](./README.tpl), or the [README.tpl](./sink/README.tpl) in the "kitchen sink" example, to get an idea of how you would structure your own templates.
+While `gadget` is meant to be used as a CLI, there's no reason you can't make use of it as a library to intgrate into your own tools. If you were wondering, yes, this readme file was generated by `gadget` itself. Take a look at [README.tpl](./README.tpl), or the [README.tpl](./sink/README.tpl) in the "kitchen sink" example, to get an idea of how you would structure your own templates.
 
-# License
+{{ range . }}{{ if eq .Name "gadget" }}
+
+{{ range .Files.Items }}
+### File `{{ .Path }}` {{ $path := .Name }}
+{{ range .Types.Items }}
+#### Type `{{ .Name }}`
+* `{{ trim .Signature }}` [#]({{ $path }}#L{{ .LineStart }})
+* `{{ $path }}:{{ .LineStart }}:{{ .LineEnd }}` [#]({{ $path }}#L{{ .LineStart }}-L{{ .LineEnd }})
+
+Exported Fields:
+{{ range .Fields.Items }}
+{{ if .IsExported }}
+1. `{{ .Name }}`: {{ .Comment }} [#]({{ $path }}#L{{ .Line }})
+{{ end }}
+{{ end }}
+---
+{{ end }}
+{{ range .Functions.Items }}
+#### Function `{{ .Name }}`
+* `{{ trim .Signature }}` [#]({{ $path }}#L{{ .LineStart }})
+* `{{ $path }}:{{ .LineStart }}:{{ .LineEnd }}` [#]({{ $path }}#L{{ .LineStart }}-L{{ .LineEnd }})
+{{ if .Doc }}
+{{ .Doc }}{{ end }}
+---
+{{ end }}
+{{ end }}
+
+{{ end }}{{ end }}
+## License
 Copyright © {{ now | date "2006" }} [Wilhelm Murdoch](https://wilhelm.codes).
 
 This project is [MIT](./LICENSE) licensed.
