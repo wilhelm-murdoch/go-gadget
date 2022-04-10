@@ -74,7 +74,7 @@ func (t *Type) parseBody() {
 // it to the Signature field of struct Function.
 func (t *Type) parseSignature() {
 	line := strings.TrimSpace(string(GetLinesFromFile(t.parent.Path, t.LineStart, t.LineStart)))
-	t.Signature = line[:len(line)-1]
+	t.Signature = strings.TrimSpace(line[:len(line)-1])
 }
 
 // parseFields iterates through the struct's list of defined methods to

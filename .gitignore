@@ -38,3 +38,4 @@ cover.html
 cmd/gadget/gadget
 *.json
 gadget
+!sink/sink.json

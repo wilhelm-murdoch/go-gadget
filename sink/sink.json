@@ -1,0 +1,506 @@
+[
+  {
+    "name": "sink_test",
+    "files": [
+      {
+        "name": "benchmarks_test.go",
+        "path": "benchmarks_test.go",
+        "package": "sink_test",
+        "is_main": false,
+        "is_test": true,
+        "has_tests": false,
+        "has_benchmarks": true,
+        "has_examples": false,
+        "imports": [
+          "fmt",
+          "testing"
+        ],
+        "values": null,
+        "functions": [
+          {
+            "name": "BenchmarkKitchenSink",
+            "is_test": false,
+            "is_benchmark": true,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "body": "for i := 0; i < b.N; i++ {\n\tfmt.Println(\"intentionally not implemented\")\n}",
+            "signature": "func BenchmarkKitchenSink(b *testing.B)",
+            "line_start": 8,
+            "line_end": 12,
+            "line_count": 4
+          }
+        ],
+        "types": null
+      },
+      {
+        "name": "examples_test.go",
+        "path": "examples_test.go",
+        "package": "sink_test",
+        "is_main": false,
+        "is_test": true,
+        "has_tests": false,
+        "has_benchmarks": false,
+        "has_examples": true,
+        "imports": [
+          "fmt",
+          "github.com/wilhelm-murdoch/go-gadget/sink"
+        ],
+        "values": null,
+        "functions": [
+          {
+            "name": "ExampleNewNormalStructTest",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": true,
+            "is_exported": true,
+            "is_method": false,
+            "output": "// Output:\n// Wilhelm Murdoch",
+            "body": "s := sink.NewNormalStructTest(\"Wilhelm\", \"Murdoch\", 40)\n\nfmt.Println(s.First, s.Last)",
+            "signature": "func ExampleNewNormalStructTest()",
+            "line_start": 9,
+            "line_end": 16,
+            "line_count": 7
+          }
+        ],
+        "types": null
+      },
+      {
+        "name": "sink_test.go",
+        "path": "sink_test.go",
+        "package": "sink_test",
+        "is_main": false,
+        "is_test": true,
+        "has_tests": true,
+        "has_benchmarks": false,
+        "has_examples": false,
+        "imports": [
+          "testing",
+          "github.com/stretchr/testify/assert"
+        ],
+        "values": null,
+        "functions": [
+          {
+            "name": "TestKitchenSink",
+            "is_test": true,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "body": "assert.True(t, true, true)",
+            "signature": "func TestKitchenSink(t *testing.T)",
+            "line_start": 9,
+            "line_end": 11,
+            "line_count": 2
+          }
+        ],
+        "types": null
+      }
+    ]
+  },
+  {
+    "name": "sink",
+    "files": [
+      {
+        "name": "sink.go",
+        "path": "sink.go",
+        "package": "sink",
+        "is_main": false,
+        "is_test": false,
+        "has_tests": false,
+        "has_benchmarks": false,
+        "has_examples": false,
+        "imports": [
+          "fmt"
+        ],
+        "values": [
+          {
+            "kind": "const",
+            "name": "ONE",
+            "line": 9,
+            "body": "ONE   = 1 // represents the number 1"
+          },
+          {
+            "kind": "const",
+            "name": "TWO",
+            "line": 10,
+            "body": "TWO   = 2 // represents the number 2"
+          },
+          {
+            "kind": "const",
+            "name": "THREE",
+            "line": 11,
+            "body": "THREE = 3 // represents the number 3"
+          },
+          {
+            "kind": "var",
+            "name": "one",
+            "line": 16,
+            "body": "one   = \"one\"   // represents the english spelling of 1"
+          },
+          {
+            "kind": "var",
+            "name": "two",
+            "line": 17,
+            "body": "two   = \"two\"   // represents the english spelling of 2"
+          },
+          {
+            "kind": "var",
+            "name": "three",
+            "line": 18,
+            "body": "three = \"three\" // represents the english spelling of 3"
+          },
+          {
+            "kind": "var",
+            "name": "collection",
+            "line": 27,
+            "body": "var collection map[string]map[string]string // this should be picked up as an inline comment"
+          }
+        ],
+        "functions": [
+          {
+            "name": "PrintVars",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "doc": "PrintVars prints out a value on each line:\n",
+            "body": "fmt.Println(one)\nfmt.Println(two)\nfmt.Println(three)",
+            "signature": "func PrintVars()",
+            "line_start": 30,
+            "line_end": 34,
+            "line_count": 4
+          },
+          {
+            "name": "AssignCollection",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "doc": "AssignCollection assigns values to var collection:\n",
+            "body": "collection = make(map[string]map[string]string)\n\ncollection[\"one\"] = map[string]string{\"foo\": \"bar\"}\ncollection[\"two\"] = map[string]string{\"merp\": \"flakes\"}",
+            "signature": "func AssignCollection()",
+            "line_start": 37,
+            "line_end": 43,
+            "line_count": 6
+          },
+          {
+            "name": "PrintConst",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "doc": "PrintConst prints out a value on each line:\n",
+            "body": "fmt.Println(ONE)\nfmt.Println(TWO)\nfmt.Println(THREE)",
+            "signature": "func PrintConst()",
+            "line_start": 46,
+            "line_end": 50,
+            "line_count": 4
+          },
+          {
+            "name": "NewNormalStructTest",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "doc": "NewNormalStructTest returns a new instance of NormalStructTest:\n",
+            "body": "return &NormalStructTest{\n\tFirst:              first,\n\tLast:               last,\n\tAge:                age,\n\tEmbeddedStructTest: &EmbeddedStructTest{\"SWE\"},\n}",
+            "signature": "func NewNormalStructTest(first, last string, age int) *NormalStructTest",
+            "line_start": 72,
+            "line_end": 79,
+            "line_count": 7
+          },
+          {
+            "name": "GetPrivate",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": true,
+            "receiver": "NormalStructTest",
+            "doc": "GetPrivate is an accessor method that returns a dark secret:\n",
+            "body": "return nst.private",
+            "signature": "func (nst *NormalStructTest) GetPrivate() string",
+            "line_start": 82,
+            "line_end": 84,
+            "line_count": 2
+          },
+          {
+            "name": "GetOccupation",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": true,
+            "receiver": "NormalStructTest",
+            "doc": "GetOccupation is an accessor method that returns an occupation:\n",
+            "body": "return nst.Occupation",
+            "signature": "func (nst *NormalStructTest) GetOccupation() string",
+            "line_start": 87,
+            "line_end": 89,
+            "line_count": 2
+          },
+          {
+            "name": "GetFullName",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": true,
+            "receiver": "NormalStructTest",
+            "doc": "GetFullName is an function that attempts to return a full name:\n",
+            "body": "return fmt.Sprint(nst.First, nst.Last)",
+            "signature": "func (nst NormalStructTest) GetFullName() string",
+            "line_start": 92,
+            "line_end": 94,
+            "line_count": 2
+          },
+          {
+            "name": "notExported",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": false,
+            "is_method": true,
+            "receiver": "NormalStructTest",
+            "doc": "notExported is an example of a function that will not be exported:\n",
+            "body": "return \"I should not be exported!\"",
+            "signature": "func (nst NormalStructTest) notExported() string",
+            "line_start": 98,
+            "line_end": 100,
+            "line_count": 2
+          },
+          {
+            "name": "NewGenericStructTest",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": false,
+            "doc": "NewGenericStructTest returns a new instance of GenericStructTest:\n",
+            "body": "return &GenericStructTest[T]{first, last, age, \"hidden\"}",
+            "signature": "func NewGenericStructTest[T any](first, last string, age int) *GenericStructTest[T]",
+            "line_start": 111,
+            "line_end": 113,
+            "line_count": 2
+          },
+          {
+            "name": "GetPrivate",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": true,
+            "receiver": "GenericStructTest",
+            "doc": "GetPrivate is an accessor method that returns a dark secret:\n",
+            "body": "return nst.private",
+            "signature": "func (nst *GenericStructTest[T]) GetPrivate() string",
+            "line_start": 116,
+            "line_end": 118,
+            "line_count": 2
+          },
+          {
+            "name": "GetFullName",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": true,
+            "receiver": "GenericStructTest",
+            "doc": "GetFullName is an function that attempts to return a full name:\n",
+            "body": "return fmt.Sprint(nst.First, nst.Last)",
+            "signature": "func (nst GenericStructTest[T]) GetFullName() string",
+            "line_start": 121,
+            "line_end": 123,
+            "line_count": 2
+          },
+          {
+            "name": "IsBlank",
+            "is_test": false,
+            "is_benchmark": false,
+            "is_example": false,
+            "is_exported": true,
+            "is_method": true,
+            "receiver": "GenericStructTest",
+            "doc": "IsBlank is an function that does not have a body:\n",
+            "body": "",
+            "signature": "func (nst GenericStructTest[T]) IsBlank() {",
+            "line_start": 126,
+            "line_end": 126,
+            "line_count": 0
+          }
+        ],
+        "types": [
+          {
+            "name": "NormalFuncType",
+            "kind": "function",
+            "line_start": 21,
+            "line_end": 21,
+            "line_count": 1,
+            "signature": "type NormalFuncType func() boo",
+            "fields": null
+          },
+          {
+            "name": "NormalChannelType",
+            "kind": "channel",
+            "line_start": 22,
+            "line_end": 22,
+            "line_count": 1,
+            "signature": "type NormalChannelType chan boo",
+            "fields": null
+          },
+          {
+            "name": "NormalRandomType",
+            "kind": "map",
+            "line_start": 23,
+            "line_end": 23,
+            "line_count": 1,
+            "signature": "type NormalRandomType map[string]in",
+            "fields": null
+          },
+          {
+            "name": "GenericRandomType",
+            "kind": "array",
+            "line_start": 24,
+            "line_end": 24,
+            "line_count": 1,
+            "signature": "type GenericRandomType[T any] []strin",
+            "fields": null
+          },
+          {
+            "name": "InterfaceTest",
+            "kind": "interface",
+            "line_start": 53,
+            "line_end": 55,
+            "line_count": 3,
+            "signature": "type InterfaceTest interface",
+            "body": "ImplementMe() // this should be added to your data structures to implement this interface.",
+            "fields": [
+              {
+                "name": "ImplementMe",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 54,
+                "body": "ImplementMe()",
+                "comment": "this should be added to your data structures to implement this interface."
+              }
+            ]
+          },
+          {
+            "name": "EmbeddedStructTest",
+            "kind": "struct",
+            "line_start": 58,
+            "line_end": 60,
+            "line_count": 3,
+            "signature": "type EmbeddedStructTest struct",
+            "body": "Occupation string // a standard job title",
+            "fields": [
+              {
+                "name": "Occupation",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 59,
+                "body": "Occupation string",
+                "comment": "a standard job title"
+              }
+            ]
+          },
+          {
+            "name": "NormalStructTest",
+            "kind": "struct",
+            "line_start": 63,
+            "line_end": 69,
+            "line_count": 7,
+            "signature": "type NormalStructTest struct",
+            "body": "First               string // first name\nLast                string // last name\nAge                 int    // age\nprivate             string // a dark secret\n*EmbeddedStructTest        // an embedded struct",
+            "fields": [
+              {
+                "name": "First",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 64,
+                "body": "First string",
+                "comment": "first name"
+              },
+              {
+                "name": "Last",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 65,
+                "body": "Last string",
+                "comment": "last name"
+              },
+              {
+                "name": "Age",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 66,
+                "body": "Age int",
+                "comment": "age"
+              },
+              {
+                "name": "private",
+                "is_exported": false,
+                "is_embedded": false,
+                "line": 67,
+                "body": "private string",
+                "comment": "a dark secret"
+              },
+              {
+                "name": "&{1976 EmbeddedStructTest}",
+                "is_exported": false,
+                "is_embedded": true,
+                "line": 68,
+                "body": "*EmbeddedStructTest",
+                "comment": "an embedded struct"
+              }
+            ]
+          },
+          {
+            "name": "GenericStructTest",
+            "kind": "struct",
+            "line_start": 103,
+            "line_end": 108,
+            "line_count": 6,
+            "signature": "type GenericStructTest[T any] struct",
+            "body": "First   string\nLast    string\nAge     int\nprivate string",
+            "fields": [
+              {
+                "name": "First",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 104,
+                "body": "First string"
+              },
+              {
+                "name": "Last",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 105,
+                "body": "Last string"
+              },
+              {
+                "name": "Age",
+                "is_exported": true,
+                "is_embedded": false,
+                "line": 106,
+                "body": "Age int"
+              },
+              {
+                "name": "private",
+                "is_exported": false,
+                "is_embedded": false,
+                "line": 107,
+                "body": "private string"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
