@@ -13,7 +13,7 @@ It _inspects_ your _go_ code, hence the name:
 ### Why?
 I was working on [another project](https://github.com/wilhelm-murdoch/go-collection) of mine and thought to myself, "It would be nice if I didn't have to constantly update this readme file every time I made a change." So, I started digging around Go's AST package and came up with `gadget`.
 ### But, pkg.go.dev already does this ...
-Yeah, I know. But, I didn't fully realise I writing a crappier version of pkg.go.dev until about 90% into the project.
+Yeah, I know. But, I didn't fully realise I was writing a crappier version of pkg.go.dev until about 90% into the project.
 
 * Maybe you don't want people to leave your repository to understand the basics of your package's API. 
 * Maybe you want to present this data in a different, more personalised, format.
