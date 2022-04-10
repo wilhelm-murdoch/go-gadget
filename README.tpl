@@ -59,7 +59,7 @@ COPYRIGHT:
    (c) 2022 Wilhelm Codes ( https://wilhelm.codes )
 ```
 ### Example Mapping
-One of the primary goals of ths project was to link example functions to their associated functions and methods. As I'm regenerating templates, I'd like to have the example body as well as the expected output to live alongside the associated function so I can easily reference it within the [Go template](./README.tpl).
+One of the primary goals of this project was to link example functions to their associated functions and methods. As I'm regenerating templates, I'd like to have the example body as well as the expected output to live alongside the associated function so I can easily reference it within the [Go template](./README.tpl).
 
 ### JSON
 Invoking the command with no flags will result in `gadget` searching for `*.go` files by recursively walking through the present working directory. Results will be displayed as a JSON object following this structure:
