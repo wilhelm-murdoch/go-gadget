@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/Masterminds/sprig"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/urfave/cli/v2"
 	"github.com/wilhelm-murdoch/go-collection"
 	"github.com/wilhelm-murdoch/go-gadget"
